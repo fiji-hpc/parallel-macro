@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Ij1MPIwrapper:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Ij1MPIwrapper_jar</output-path>
+    <root id="archive" name="Ij1MPIwrapper.jar">
+      <element id="module-output" name="Ij1MPIwrapper" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../mpi.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
