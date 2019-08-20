@@ -18,7 +18,7 @@ public class MPIWrapper {
 	private static String logFileReportPrefix = "report_";
 
 	private static Map<Integer, String> tasks = new HashMap<>();
-	
+
 	private static Integer numberOfTasks = 0;
 
 	public static void addTask(String description) {
@@ -28,19 +28,20 @@ public class MPIWrapper {
 	public static void reportTasks() {
 		try {
 			String text = "";
-			
+
 			Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
 				.valueOf(getRank()) + ".plog");
-			
-			Files.write(progressLogFilePath, "start".getBytes(),
-				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-			
+
+			Files.write(progressLogFilePath, "start".concat(System.lineSeparator())
+				.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+
 			for (Integer counter = 0; counter < numberOfTasks; counter++) {
-				text = String.valueOf(counter).concat(",").concat(tasks.get(counter));
+				text = String.valueOf(counter).concat(",").concat(tasks.get(counter))
+					.concat(System.lineSeparator());
 				Files.write(progressLogFilePath, text.getBytes(),
 					StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			}
-			
+
 		}
 		catch (IOException e) {
 			LOGGER.warning("" + e.getMessage());
