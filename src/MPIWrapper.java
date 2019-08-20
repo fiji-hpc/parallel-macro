@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -16,9 +17,9 @@ public class MPIWrapper {
 	private static String logFileProgressPrefix = "progress_";
 	private static String logFileReportPrefix = "report_";
 
-	private static Map<Integer, String> tasks;
+	private static Map<Integer, String> tasks = new HashMap<>();
 	
-	private static int numberOfTasks = 0;
+	private static Integer numberOfTasks = 0;
 
 	public static void addTask(String description) {
 		tasks.put(numberOfTasks++, description);
@@ -26,7 +27,6 @@ public class MPIWrapper {
 
 	public static void reportTasks() {
 		try {
-			Integer size = tasks.size();
 			String text = "";
 			
 			Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
@@ -35,7 +35,7 @@ public class MPIWrapper {
 			Files.write(progressLogFilePath, "start".getBytes(),
 				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			
-			for (int counter = 0; counter < size; counter++) {
+			for (Integer counter = 0; counter < numberOfTasks; counter++) {
 				text = String.valueOf(counter).concat(",").concat(tasks.get(counter));
 				Files.write(progressLogFilePath, text.getBytes(),
 					StandardOpenOption.APPEND, StandardOpenOption.CREATE);
