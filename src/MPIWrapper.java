@@ -17,12 +17,11 @@ public class MPIWrapper {
 	private static String logFileReportPrefix = "report_";
 
 	private static Map<Integer, String> tasks;
+	
+	private static int numberOfTasks = 0;
 
-	public static void setTasks(String[] descriptions) {
-		int counter = 0;
-		for (String description : descriptions) {
-			tasks.put(counter++, description);
-		}
+	public static void addTask(String description) {
+		tasks.put(numberOfTasks++, description);
 	}
 
 	public static void reportTasks() {
