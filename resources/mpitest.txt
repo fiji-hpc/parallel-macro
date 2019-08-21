@@ -1,0 +1,169 @@
+function parInit() {
+	ret = call("MPIWrapper.initialise");
+	parReportProgress(0, 0);
+}
+
+function parFinalize() {
+	parReportProgress(0, 100);
+	ret = call("MPIWrapper.finalise");
+}
+
+function parGetRank() {
+	rank = call("MPIWrapper.getRank");
+	return rank;
+}
+
+function parGetSize() {
+	size = call("MPIWrapper.getSize");
+	return size;
+}
+
+function parBarrier() {
+	ret = call("MPIWrapper.barrier");
+}
+
+function parReportProgress(task, progress) {
+	ret = call("MPIWrapper.reportProgress", task, progress);
+}
+
+function parReportText(text) {
+	ret = call("MPIWrapper.reportText",text);
+}
+
+function addTask(description){
+	ret = call("MPIWrapper.addTask", description);
+}
+
+function reportTasks(){
+	ret = call("MPIWrapper.reportTasks");
+}
+
+function parGetMySubList(list) {
+	rank = parGetRank();
+	size = parGetSize();
+	lastRank = round(size)-1;
+	if (rank == lastRank) 
+		subList = Array.slice(list, (rank) * round(list.length / size) , list.length);
+	else
+        subList = Array.slice(list, (rank) * round(list.length / size) , (rank + 1) * round(list.length / size));
+	return subList;
+}
+
+function countFiles(path) {
+  list = getFileList(path); 
+  for (i=0; i<list.length; i++) {
+	  if (endsWith(list[i], "/"))
+		  countFiles(""+path+list[i]);
+	  else
+		  count++;
+  }
+}
+
+function processFiles(dir) {
+  list = getFileList(dir);
+  subList = parGetMySubList(list);
+
+  for (i=0; i<subList.length; i++) {
+	  if (endsWith(subList[i], "/"))
+		  processFiles(""+dir+subList[i]);
+	  else {
+		 //showProgress(n++, count);
+		 path = dir+subList[i];
+		 processFile(path);
+	  }
+  }
+}
+
+function processFile(path) {
+   if (endsWith(path, ".tif")) {
+	   print("#" + rank + " node processing " + path);
+	   processed++;
+	   //open(path);
+	   //run("Subtract Background...", "rolling=50 white");
+	   //save(path);
+	   //close();
+  }
+}
+
+// START OF MAIN
+print("Running MPI macro: Hello World Benchmark");
+
+// Size of the image to generate:
+width = 5120
+height = 5120
+
+// Number of times to show hello world on the image:
+numberOfMessages = 10000
+
+//setTool("text");
+
+// Seed the random generator
+random("seed", getTime())
+
+// Parallelization
+parInit();
+	addTask("My very important task");
+	addTask("My second important task");
+	reportTasks();
+	
+
+	rank = parGetRank();
+	size = parGetSize();
+
+	print("My rank = " + rank + ", MPI world size = " + size);
+	
+	widthSubimage = floor(width/size);
+	heightSubimage = floor(height/size);
+	
+	// Give rank 0 any extra work:
+	if(rank == 0){
+		widthSubimage = round(widthSubimage + width % size);
+		heightSubimage = round(heightSubimage + height % size);
+	}
+	
+	newImage("Hello World Image", "8-bit black", widthSubimage, heightSubimage, 1);
+	
+	// Split the number of messages to the processing elements:
+	part = floor(numberOfMessages/size);
+	
+	// Give rank 0 any extra messages:
+	if(rank == 0){
+		part = round(part + numberOfMessages % size);
+	}
+	
+	print("Rank "+rank+" will create "+part+" hello world overlays, on a "+widthSubimage+" x "+heightSubimage+" subimage.");
+	
+	counter = 0;
+	while(counter < part){
+		// Create and show a single hello world:
+		fontSize = random * 39 + 1;
+		setFont("Serif", fontSize, " antialiased");
+		red = random * 255;
+		green = random * 255;
+		blue = random * 255;
+		setColor(red, green, blue);
+		xPosition = random * widthSubimage;
+		yPosition = random * heightSubimage;
+		Overlay.drawString("Hello World!", xPosition, yPosition, 0.0);
+		Overlay.show();
+		counter++;
+		
+		// Update progress periodically:
+		if(counter % 500 == 0){
+			parReportProgress(0, counter/part * 100);
+		}
+	}
+	
+	exec("mkdir output");
+	exec("chmod -R 777 output");
+	path = ".//output//";
+	imageTitle = "HelloWorld";	
+	saveAs("tiff",path+imageTitle+rank);
+	
+	// Report that the rank has finished it's work:
+	parReportText("Rank "+rank+" finished.");
+	
+	// Sync
+	parBarrier();
+// Stop parallel
+parFinalize();
