@@ -33,7 +33,7 @@ public class MPIWrapper {
 				.valueOf(getRank()) + ".plog");
 
 			Files.write(progressLogFilePath, "start".concat(System.lineSeparator())
-				.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+				.getBytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
 			for (Integer counter = 0; counter < numberOfTasks; counter++) {
 				text = String.valueOf(counter).concat(",").concat(tasks.get(counter))
