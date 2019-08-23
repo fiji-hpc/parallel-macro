@@ -31,8 +31,8 @@ public class MPIWrapper {
 
 			Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
 				.valueOf(getRank()) + ".plog");
-
-			Files.write(progressLogFilePath, "start".concat(System.lineSeparator())
+			
+			Files.write(progressLogFilePath, Integer.toString(getSize()).concat(System.lineSeparator())
 				.getBytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 
 			for (Integer counter = 0; counter < numberOfTasks; counter++) {
