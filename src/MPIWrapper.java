@@ -21,6 +21,9 @@ public class MPIWrapper {
 
 	private static Integer numberOfTasks = 0;
 
+	private static Map<Integer, Integer> lastWrittenTaskPercentage =
+		new HashMap<>();
+
 	public static void addTask(String description) {
 		tasks.put(numberOfTasks++, description);
 	}
@@ -31,9 +34,10 @@ public class MPIWrapper {
 
 			Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
 				.valueOf(getRank()) + ".plog");
-			
-			Files.write(progressLogFilePath, Integer.toString(getSize()).concat(System.lineSeparator())
-				.getBytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+
+			Files.write(progressLogFilePath, Integer.toString(getSize()).concat(System
+				.lineSeparator()).getBytes(), StandardOpenOption.TRUNCATE_EXISTING,
+				StandardOpenOption.CREATE);
 
 			for (Integer counter = 0; counter < numberOfTasks; counter++) {
 				text = String.valueOf(counter).concat(",").concat(tasks.get(counter))
@@ -49,17 +53,25 @@ public class MPIWrapper {
 	}
 
 	public static int reportProgress(int taskId, int progress) {
-		try {
-			Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
-				.valueOf(getRank()) + ".plog");
-			String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
-				progress)).concat(System.lineSeparator());
-			Files.write(progressLogFilePath, text.getBytes(),
-				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-		}
-		catch (IOException e) {
-			LOGGER.warning("reportProgress error - " + e.getMessage());
-			return -1;
+		// Do not write progress percentage that has already been written to avoid
+		// writing gigantic progress log files:
+		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
+			progress > lastWrittenTaskPercentage.get(taskId))
+		{
+			lastWrittenTaskPercentage.put(taskId, progress);
+
+			try {
+				Path progressLogFilePath = Paths.get(logFileProgressPrefix + String
+					.valueOf(getRank()) + ".plog");
+				String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
+					progress)).concat(System.lineSeparator());
+				Files.write(progressLogFilePath, text.getBytes(),
+					StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+			}
+			catch (IOException e) {
+				LOGGER.warning("reportProgress error - " + e.getMessage());
+				return -1;
+			}
 		}
 		return 0;
 	}
