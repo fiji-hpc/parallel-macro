@@ -96,7 +96,7 @@ height = 5120
 message = "Hello world!";
 
 // Number of times to show hello world on the image:
-numberOfMessages = 10000
+numberOfMessages = 10000;
 
 // Number of times to add noise to make the message difficult to see:
 numberOfTimesToApplyNoise = 10;
@@ -165,6 +165,7 @@ parInit();
 			parReportProgress(0, counter/part * 100);
 		}
 	}
+	parReportProgress(0, 100);
 	
 	parReportProgress(1, 0);
 	run("Flatten");
