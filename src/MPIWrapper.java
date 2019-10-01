@@ -1,6 +1,9 @@
+import mpi.Datatype;
 import mpi.MPI;
+import mpi.MPIException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,17 +50,17 @@ public class MPIWrapper {
 			}
 
 		}
-		catch (IOException e) {
-			LOGGER.warning("" + e.getMessage());
+		catch (IOException exc) {
+			LOGGER.warning("" + exc.getMessage());
 		}
 	}
 
 	public static int reportProgress(int taskId, int progress) {
 		// Ignore impossible new progress percentages:
-		if(progress > 100 || progress < 0) {
+		if (progress > 100 || progress < 0) {
 			return lastWrittenTaskPercentage.get(taskId);
 		}
-		
+
 		// Do not write progress percentage that has already been written to avoid
 		// writing gigantic progress log files:
 		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
@@ -73,8 +76,8 @@ public class MPIWrapper {
 				Files.write(progressLogFilePath, text.getBytes(),
 					StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			}
-			catch (IOException e) {
-				LOGGER.warning("reportProgress error - " + e.getMessage());
+			catch (IOException exc) {
+				LOGGER.warning("reportProgress error - " + exc.getMessage());
 				return -1;
 			}
 		}
@@ -87,8 +90,8 @@ public class MPIWrapper {
 				".tlog"), textToReport.concat(System.lineSeparator()).getBytes(),
 				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 		}
-		catch (IOException e) {
-			LOGGER.warning("reportText error - " + e.getMessage());
+		catch (IOException exc) {
+			LOGGER.warning("reportText error - " + exc.getMessage());
 			return -1;
 		}
 		return 0;
@@ -101,8 +104,8 @@ public class MPIWrapper {
 			MPI.Init(args);
 			return 0;
 		}
-		catch (Exception e) {
-			LOGGER.warning("MPI.Init() error - " + e.getMessage());
+		catch (Exception exc) {
+			LOGGER.warning("MPI.Init() error - " + exc.getMessage());
 		}
 		return -1;
 	}
@@ -112,8 +115,8 @@ public class MPIWrapper {
 			MPI.Finalize();
 			return 0;
 		}
-		catch (Exception e) {
-			LOGGER.warning("MPI.Finalize() error - " + e.getMessage());
+		catch (Exception exc) {
+			LOGGER.warning("MPI.Finalize() error - " + exc.getMessage());
 		}
 		return -1;
 	}
@@ -145,13 +148,76 @@ public class MPIWrapper {
 			MPI.COMM_WORLD.barrier();
 			return 0;
 		}
-		catch (Exception e) {
-			LOGGER.warning("MPI.COMM_WORLD.barrier() error - " + e.getMessage());
+		catch (Exception exc) {
+			LOGGER.warning("MPI.COMM_WORLD.barrier() error - " + exc.getMessage());
 		}
 		return -1;
 	}
 
 	private MPIWrapper() {
-		// Empty private constructor.
+		// Empty private constructor to hide default public one.
+	}
+
+	// Details about macro variables at
+	// https://imagej.nih.gov/ij/developer/macro/macros.html at the variables
+	// section:
+	private static Datatype findDatatype(Object sendBuffer) {
+		Datatype buffersDatatype = null;
+		Class<? extends Object> bufferClass = sendBuffer.getClass();
+		if (bufferClass == double[].class) {
+			buffersDatatype = MPI.DOUBLE;
+		}
+		else if (bufferClass == boolean[].class) {
+			buffersDatatype = MPI.BOOLEAN;
+		}
+		else if (bufferClass == char[].class) {
+			buffersDatatype = MPI.CHAR;
+		}
+		else {
+			LOGGER.warning("Unknown datatype: " + sendBuffer.getClass() +
+				" could not be converted to MPI datatype.");
+		}
+		return buffersDatatype;
+	}
+
+	// Simple scatter which attempts to split the send buffer to equal parts among
+	// the nodes:
+	public static Object scatterEqually(Object sendBuffer, int root) {
+		int sendCount = 0;
+		int receiveCount = 0;
+		if (sendBuffer.getClass().isArray()) {
+			// Divide work to equal parts:
+			int totalLength = Array.getLength(sendBuffer);
+			int part = totalLength / getSize();
+			sendCount = part;
+			receiveCount = part;
+			// Any additional remaining work should be given to rank 0:
+			if (getRank() == 0) {
+				int remainingWork = totalLength % getSize();
+				sendCount = part + remainingWork;
+				receiveCount = part + remainingWork;
+			}
+		}
+		return scatter(sendBuffer, sendCount, receiveCount, root);
+	}
+
+	public static Object scatter(Object sendBuffer, int sendCount,
+		int receiveCount, int root)
+	{
+		// The receive buffer will be of the same type as the send buffer:
+		Object receiveBuffer = Array.newInstance(sendBuffer.getClass(),
+			receiveCount);
+
+		try {
+			Datatype sendType = findDatatype(sendBuffer);
+			Datatype receiveType = sendType;
+
+			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType, receiveBuffer,
+				receiveCount, receiveType, root);
+		}
+		catch (MPIException exc) {
+			LOGGER.warning(exc.getMessage());
+		}
+		return receiveBuffer;
 	}
 }
