@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="out/artifacts/Ij1MPIwrapper_jar/Ij1MPIwrapper.jar"/>
+	<classpathentry kind="lib" path="C:/Documents/mpi.jar"/>
 	<classpathentry kind="output" path="out/production/Ij1MPIwrapper"/>
 </classpath>
