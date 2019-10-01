@@ -53,6 +53,11 @@ public class MPIWrapper {
 	}
 
 	public static int reportProgress(int taskId, int progress) {
+		// Ignore impossible new progress percentages:
+		if(progress > 100 || progress < 0) {
+			return lastWrittenTaskPercentage.get(taskId);
+		}
+		
 		// Do not write progress percentage that has already been written to avoid
 		// writing gigantic progress log files:
 		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
