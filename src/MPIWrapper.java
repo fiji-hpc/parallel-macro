@@ -163,19 +163,18 @@ public class MPIWrapper {
 	// section:
 	private static Datatype findDatatype(Object sendBuffer) {
 		Datatype buffersDatatype = null;
-		Class<? extends Object> bufferClass = sendBuffer.getClass();
-		if (bufferClass == double[].class) {
+		if (sendBuffer.getClass().equals(double[].class)) {
 			buffersDatatype = MPI.DOUBLE;
 		}
-		else if (bufferClass == boolean[].class) {
+		else if (sendBuffer.getClass().equals(boolean[].class)) {
 			buffersDatatype = MPI.BOOLEAN;
 		}
-		else if (bufferClass == char[].class) {
+		else if (sendBuffer.getClass().equals(char[].class)) {
 			buffersDatatype = MPI.CHAR;
 		}
 		else {
-			LOGGER.warning("Unknown datatype: " + sendBuffer.getClass() +
-				" could not be converted to MPI datatype.");
+			LOGGER.warning("Unknown type: " + sendBuffer.getClass()
+				.getCanonicalName());
 		}
 		return buffersDatatype;
 	}
@@ -183,30 +182,27 @@ public class MPIWrapper {
 	// Simple scatter which attempts to split the send buffer to equal parts among
 	// the nodes:
 	public static Object scatterEqually(Object sendBuffer, int root) {
-		int sendCount = 0;
-		int receiveCount = 0;
+		int count = 0;
 		if (sendBuffer.getClass().isArray()) {
 			// Divide work to equal parts:
 			int totalLength = Array.getLength(sendBuffer);
 			int part = totalLength / getSize();
-			sendCount = part;
-			receiveCount = part;
+			count = part;
 			// Any additional remaining work should be given to rank 0:
 			if (getRank() == 0) {
 				int remainingWork = totalLength % getSize();
-				sendCount = part + remainingWork;
-				receiveCount = part + remainingWork;
+				count = part + remainingWork;
 			}
 		}
-		return scatter(sendBuffer, sendCount, receiveCount, root);
+		return scatter(sendBuffer, count, count, root);
 	}
 
 	public static Object scatter(Object sendBuffer, int sendCount,
 		int receiveCount, int root)
 	{
 		// The receive buffer will be of the same type as the send buffer:
-		Object receiveBuffer = Array.newInstance(sendBuffer.getClass(),
-			receiveCount);
+		Object receiveBuffer = Array.newInstance(sendBuffer.getClass()
+			.getComponentType(), receiveCount);
 
 		try {
 			Datatype sendType = findDatatype(sendBuffer);
@@ -217,6 +213,7 @@ public class MPIWrapper {
 		}
 		catch (MPIException exc) {
 			LOGGER.warning(exc.getMessage());
+			System.out.println("Error!");
 		}
 		return receiveBuffer;
 	}
