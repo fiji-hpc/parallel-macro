@@ -1,3 +1,6 @@
+
+package cz.it4i.fiji.ij1_mpi_wrapper;
+
 import mpi.Datatype;
 import mpi.MPI;
 import mpi.MPIException;
@@ -8,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -162,7 +166,7 @@ public class MPIWrapper {
 	// https://imagej.nih.gov/ij/developer/macro/macros.html at the variables
 	// section:
 	private static Datatype findDatatype(Object sendBuffer) {
-		Datatype buffersDatatype = null;
+		Datatype buffersDatatype = MPI.DOUBLE;
 		if (sendBuffer.getClass().equals(double[].class)) {
 			buffersDatatype = MPI.DOUBLE;
 		}
@@ -181,23 +185,38 @@ public class MPIWrapper {
 
 	// Simple scatter which attempts to split the send buffer to equal parts among
 	// the nodes:
-	public static Object scatterEqually(Object sendBuffer, int root) {
+	public static String scatterEqually(String sendString, int root) {
+		// Convert comma separated string to array:
+		double[] sendBuffer = convertCommaSeparatedStringToArray(sendString);
+
 		int count = 0;
-		if (sendBuffer.getClass().isArray()) {
-			// Divide work to equal parts:
-			int totalLength = Array.getLength(sendBuffer);
-			int part = totalLength / getSize();
-			count = part;
-			// Any additional remaining work should be given to rank 0:
-			if (getRank() == 0) {
-				int remainingWork = totalLength % getSize();
-				count = part + remainingWork;
-			}
+		// Divide work to equal parts:
+		int totalLength = Array.getLength(sendBuffer);
+		int part = totalLength / getSize();
+		count = part;
+		// Any additional remaining work should be given to rank 0:
+		if (getRank() == 0) {
+			int remainingWork = totalLength % getSize();
+			count = part + remainingWork;
 		}
-		return scatter(sendBuffer, count, count, root);
+
+		double[] receivedBuffer = (double[]) scatterArray(sendBuffer, count, count,
+			root);
+
+		// Convert back to string and return:
+		return convertArrayToCommaSeparatedString(receivedBuffer);
 	}
 
-	public static Object scatter(Object sendBuffer, int sendCount,
+	public static String scatter(String sendString, int sendCount,
+		int receiveCount, int root)
+	{
+		double[] sendBuffer = convertCommaSeparatedStringToArray(sendString);
+		double[] receiveBuffer = (double[]) scatterArray(sendBuffer, sendCount,
+			receiveCount, root);
+		return convertArrayToCommaSeparatedString(receiveBuffer);
+	}
+
+	private static Object scatterArray(Object sendBuffer, int sendCount,
 		int receiveCount, int root)
 	{
 		// The receive buffer will be of the same type as the send buffer:
@@ -213,8 +232,25 @@ public class MPIWrapper {
 		}
 		catch (MPIException exc) {
 			LOGGER.warning(exc.getMessage());
-			System.out.println("Error!");
 		}
 		return receiveBuffer;
+	}
+
+	private static String convertArrayToCommaSeparatedString(double[] array) {
+		int length = array.length;
+		StringBuilder bld = new StringBuilder();
+		for (int i = 0; i < length; i++) {
+			bld.append(array[i]);
+			if (i != length - 1) {
+				bld.append(", ");
+			}
+		}
+		return bld.toString();
+	}
+
+	private static double[] convertCommaSeparatedStringToArray(String string) {
+		String[] arrayString = string.split(",");
+		return Arrays.stream(arrayString).mapToDouble(Double::parseDouble)
+			.toArray();
 	}
 }
