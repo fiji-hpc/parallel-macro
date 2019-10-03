@@ -1,4 +1,3 @@
-
 package cz.it4i.fiji.ij1_mpi_wrapper;
 
 import mpi.Datatype;

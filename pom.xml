@@ -28,13 +28,13 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--  Add the mpi.jar from the HPC cluster -->
+		<!-- Add the mpi.jar from the HPC cluster -->
 		<dependency>
 			<groupId>org.open-mpi</groupId>
 			<artifactId>mpi</artifactId>
 			<version>4.0.1</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/resources/mpi.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/resources/mpi.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>
