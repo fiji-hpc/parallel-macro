@@ -1,3 +1,4 @@
+
 package cz.it4i.fiji.ij1_mpi_wrapper;
 
 import mpi.Datatype;
@@ -184,18 +185,25 @@ public class MPIWrapper {
 
 	// Simple scatter which attempts to split the send buffer to equal parts among
 	// the nodes:
-	public static String scatterEqually(String sendString, int root) {
+	public static String scatterEqually(String sendString,
+		int totalSendBufferLength, int root)
+	{
 		// Convert comma separated string to array:
-		double[] sendBuffer = convertCommaSeparatedStringToArray(sendString);
+		double[] sendBuffer;
+		if (!sendString.isEmpty()) {
+			sendBuffer = convertCommaSeparatedStringToArray(sendString);
+		}
+		else {
+			sendBuffer = new double[0];
+		}
 
 		int count = 0;
 		// Divide work to equal parts:
-		int totalLength = Array.getLength(sendBuffer);
-		int part = totalLength / getSize();
+		int part = totalSendBufferLength / getSize();
 		count = part;
 		// Any additional remaining work should be given to rank 0:
 		if (getRank() == 0) {
-			int remainingWork = totalLength % getSize();
+			int remainingWork = totalSendBufferLength % getSize();
 			count = part + remainingWork;
 		}
 
@@ -209,7 +217,14 @@ public class MPIWrapper {
 	public static String scatter(String sendString, int sendCount,
 		int receiveCount, int root)
 	{
-		double[] sendBuffer = convertCommaSeparatedStringToArray(sendString);
+		double[] sendBuffer;
+		if (!sendString.isEmpty()) {
+			sendBuffer = convertCommaSeparatedStringToArray(sendString);
+		}
+		else {
+			sendBuffer = new double[0];
+		}
+
 		double[] receiveBuffer = (double[]) scatterArray(sendBuffer, sendCount,
 			receiveCount, root);
 		return convertArrayToCommaSeparatedString(receiveBuffer);
