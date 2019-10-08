@@ -41,15 +41,16 @@ public class MPIWrapper {
 		tasksWereReported = false;
 	}
 
-	public static void addTask(String description) {
+	public static int addTask(String description) {
 		// No new tasks should be added after they were reported:
 		if (tasksWereReported) {
 			LOGGER.warning(
 				"addTask call was ignored - No new tasks should be added after they were reported.");
-			return;
+			return -1;
 		}
 
-		tasks.put(numberOfTasks++, description);
+		tasks.put(numberOfTasks, description);
+		return numberOfTasks++;
 	}
 
 	public static void reportTasks() {

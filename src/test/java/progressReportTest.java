@@ -1,9 +1,11 @@
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import cz.it4i.fiji.ij1_mpi_wrapper.MPIWrapper;
 
 public class progressReportTest {
-	
+
 	@Test
 	public void progressShouldBeReportedOnlyIfTaskExists() {
 		MPIWrapper.resetState();
@@ -31,5 +33,14 @@ public class progressReportTest {
 		MPIWrapper.reportTasks();
 		MPIWrapper.reportTasks();
 		MPIWrapper.addTask("A second task");
+	}
+
+	@Test
+	public void correctIdShouldBeAssignedToTaskWhenAdded() {
+		MPIWrapper.resetState();
+		MPIWrapper.addTask("Task one.");
+		MPIWrapper.addTask("Task two.");
+		int id = MPIWrapper.addTask("Task three.");
+		assertEquals(2, id);
 	}
 }
