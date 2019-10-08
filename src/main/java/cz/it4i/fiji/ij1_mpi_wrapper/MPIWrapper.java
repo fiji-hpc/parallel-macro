@@ -32,6 +32,14 @@ public class MPIWrapper {
 		new HashMap<>();
 
 	private static boolean tasksWereReported = false;
+	
+	// This method resets the static state of the class:
+	public static void resetState() {
+		tasks = new HashMap<>();
+		numberOfTasks = 0;
+		lastWrittenTaskPercentage = new HashMap<>();
+		tasksWereReported = false;
+	}
 
 	public static void addTask(String description) {
 		// No new tasks should be added after they were reported:
