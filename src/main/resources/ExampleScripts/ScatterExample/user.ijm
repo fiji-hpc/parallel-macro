@@ -3,9 +3,9 @@ print("Running MPI macro: Scatter example");
 
 // Parallelization
 parInit();
-	addTask("Create array to send.");
-	addTask("Scatter.");
-	reportTasks();
+	parAddTask("Create array to send.");
+	parAddTask("Scatter.");
+	parReportTasks();
 	
 	rank = parGetRank();
 	size = parGetSize();
