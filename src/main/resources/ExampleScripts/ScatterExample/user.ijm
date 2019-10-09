@@ -3,8 +3,8 @@ print("Running MPI macro: Scatter example");
 
 // Parallelization
 parInit();
-	parAddTask("Create array to send.");
-	parAddTask("Scatter.");
+	createArrayTask = parAddTask("Create array to send.");
+	scatterTask = parAddTask("Scatter.");
 	parReportTasks();
 	
 	rank = parGetRank();
@@ -13,19 +13,20 @@ parInit();
 	print("My rank = " + rank + ", MPI world size = " + size);
 	
 	// Have rank 0 create the data to scatter:
-	parReportProgress(0, 0);
+	parReportProgress(createArrayTask, 0);
 	
+	// Only rank 0 has the data:
+	sendArray = newArray(0);
 	if(rank == 0){
 		sendArray = newArray(10, 20, 30, 40);
-	} else {
-		sendArray = newArray(0);
 	}
 	
-	parReportProgress(0, 100);
+	parReportProgress(createArrayTask, 100);
 	
-	parReportProgress(1, 0);
+	parReportProgress(scatterTask, 0);
+	// The sendArray length must be known to the other nodes:
 	receiveArray = parScatterEqually(sendArray, 4, 0);
-	parReportProgress(1, 100);
+	parReportProgress(scatterTask, 100);
 	
 	// Print received array:
 	for(i = 0; i < lengthOf(receiveArray); i++){
