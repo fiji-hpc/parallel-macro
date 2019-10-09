@@ -1,3 +1,4 @@
+package cz.it4i.fiji.ij1_mpi_wrapper.test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;

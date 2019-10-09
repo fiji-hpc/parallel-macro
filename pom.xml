@@ -6,7 +6,6 @@
 	<artifactId>Ij1MPIwrapper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -25,7 +24,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-			<scope>test/java</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Add the mpi.jar from the HPC cluster -->
