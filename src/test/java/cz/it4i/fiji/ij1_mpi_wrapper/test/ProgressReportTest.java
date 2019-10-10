@@ -6,7 +6,7 @@ import org.junit.Test;
 import cz.it4i.fiji.ij1_mpi_wrapper.ProgressFileLogging;
 import cz.it4i.fiji.ij1_mpi_wrapper.ProgressLogging;
 
-public class progressReportTest {
+public class ProgressReportTest {
 
 	@Test
 	public void progressShouldBeReportedOnlyIfTaskExists() {
