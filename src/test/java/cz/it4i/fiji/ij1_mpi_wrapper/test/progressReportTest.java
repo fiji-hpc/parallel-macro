@@ -3,45 +3,57 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import cz.it4i.fiji.ij1_mpi_wrapper.MPIWrapper;
+import cz.it4i.fiji.ij1_mpi_wrapper.ProgressFileLogging;
+import cz.it4i.fiji.ij1_mpi_wrapper.ProgressLogging;
 
 public class progressReportTest {
 
 	@Test
 	public void progressShouldBeReportedOnlyIfTaskExists() {
-		MPIWrapper.resetState();
-		MPIWrapper.reportProgress(0, 100);
+		ProgressLogging progressLogging = new ProgressFileLogging();
+		int rank = 0;
+		
+		progressLogging.reportProgress(0, 100, rank);
 	}
 
 	@Test
 	public void tasksShouldBeReportedOnlyIfAtLeastOneExists() {
-		MPIWrapper.resetState();
-		MPIWrapper.reportTasks();
+		ProgressLogging progressLogging = new ProgressFileLogging();
+		int rank = 0;
+		int size = 8;
+		
+		progressLogging.reportTasks(rank, size);
 	}
 
 	@Test
 	public void tasksShouldBeReportedOnlyOnce() {
-		MPIWrapper.resetState();
-		MPIWrapper.addTask("A task");
-		MPIWrapper.reportTasks();
-		MPIWrapper.reportTasks();
+		ProgressLogging progressLogging = new ProgressFileLogging();
+		int rank = 0;
+		int size = 8;
+		
+		progressLogging.addTask("A task");
+		progressLogging.reportTasks(rank, size);
+		progressLogging.reportTasks(rank, size);
 	}
 
 	@Test
 	public void addingTasksAfterTheyHaveBeenReportedShouldNotBePossible() {
-		MPIWrapper.resetState();
-		MPIWrapper.addTask("A task");
-		MPIWrapper.reportTasks();
-		MPIWrapper.reportTasks();
-		MPIWrapper.addTask("A second task");
+		ProgressFileLogging progressLogging = new ProgressFileLogging();
+		int rank = 0;
+		int size = 8;
+		
+		progressLogging.addTask("A task");
+		progressLogging.reportTasks(rank, size);
+		progressLogging.reportTasks(rank, size);
+		progressLogging.addTask("A second task");
 	}
 
 	@Test
 	public void correctIdShouldBeAssignedToTaskWhenAdded() {
-		MPIWrapper.resetState();
-		MPIWrapper.addTask("Task one.");
-		MPIWrapper.addTask("Task two.");
-		int id = MPIWrapper.addTask("Task three.");
+		ProgressFileLogging progressLogging = new ProgressFileLogging();
+		progressLogging.addTask("Task one.");
+		progressLogging.addTask("Task two.");
+		int id = progressLogging.addTask("Task three.");
 		assertEquals(2, id);
 	}
 }
