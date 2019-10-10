@@ -11,6 +11,8 @@ import mpi.MPIException;
 public class MPIParallelism implements Parallelism {
 
 	private final Logger logger = Logger.getLogger(MPIWrapper.class.getName());
+	
+	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString(); 
 
 	@Override
 	public int initialise() {
@@ -83,7 +85,7 @@ public class MPIParallelism implements Parallelism {
 		// Convert comma separated string to array:
 		double[] sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = ArrayCommaSeparatedString.convertCommaSeparatedStringToArray(
+			sendBuffer = converter.convertCommaSeparatedStringToArray(
 				sendString);
 		}
 		else {
@@ -104,7 +106,7 @@ public class MPIParallelism implements Parallelism {
 			root);
 
 		// Convert back to string and return:
-		return ArrayCommaSeparatedString.convertArrayToCommaSeparatedString(
+		return converter.convertArrayToCommaSeparatedString(
 			receivedBuffer);
 	}
 
@@ -114,7 +116,7 @@ public class MPIParallelism implements Parallelism {
 	{
 		double[] sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = ArrayCommaSeparatedString.convertCommaSeparatedStringToArray(
+			sendBuffer = converter.convertCommaSeparatedStringToArray(
 				sendString);
 		}
 		else {
@@ -123,7 +125,7 @@ public class MPIParallelism implements Parallelism {
 
 		double[] receiveBuffer = (double[]) scatterArray(sendBuffer, sendCount,
 			receiveCount, root);
-		return ArrayCommaSeparatedString.convertArrayToCommaSeparatedString(
+		return converter.convertArrayToCommaSeparatedString(
 			receiveBuffer);
 	}
 

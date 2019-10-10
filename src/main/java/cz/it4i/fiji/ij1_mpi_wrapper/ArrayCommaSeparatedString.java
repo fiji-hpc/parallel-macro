@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class ArrayCommaSeparatedString {
 
-	public static String convertArrayToCommaSeparatedString(double[] array) {
+	public String convertArrayToCommaSeparatedString(double[] array) {
 		int length = array.length;
 		StringBuilder bld = new StringBuilder();
 		for (int i = 0; i < length; i++) {
@@ -17,7 +17,7 @@ public class ArrayCommaSeparatedString {
 		return bld.toString();
 	}
 
-	public static double[] convertCommaSeparatedStringToArray(String string) {
+	public double[] convertCommaSeparatedStringToArray(String string) {
 		String[] arrayString = string.split(",");
 		return Arrays.stream(arrayString).mapToDouble(Double::parseDouble)
 			.toArray();
