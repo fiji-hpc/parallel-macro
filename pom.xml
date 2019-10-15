@@ -5,18 +5,34 @@
 	<groupId>cz.it4i.fiji</groupId>
 	<artifactId>Ij1MPIwrapper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<tests.skip>true</tests.skip>
+	</properties>
+
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
+
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<!-- Skip Unit Test during building because they will not run with the 
+				cluster's mpi.jar on a PC -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.1</version>
+				<configuration>
+					<skipTests>${tests.skip}</skipTests>
+				</configuration>
+			</plugin>
 		</plugins>
+
 	</build>
 
 	<dependencies>

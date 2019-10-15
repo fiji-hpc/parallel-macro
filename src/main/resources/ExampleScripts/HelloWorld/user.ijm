@@ -24,12 +24,12 @@ random("seed", getTime())
 
 // Parallelization
 parInit();
-	addTask("Message overlay generation.");
-	addTask("Flatten message overlays.");
-	addTask("Add noise multiple times.");
-	addTask("Draw random lines.");
-	addTask("Gaussian Blur.");
-	reportTasks();
+	parAddTask("Message overlay generation.");
+	parAddTask("Flatten message overlays.");
+	parAddTask("Add noise multiple times.");
+	parAddTask("Draw random lines.");
+	parAddTask("Gaussian Blur.");
+	parReportTasks();
 	
 
 	rank = parGetRank();

@@ -31,11 +31,40 @@ public class MPIWrapper {
 	private static Map<Integer, Integer> lastWrittenTaskPercentage =
 		new HashMap<>();
 
-	public static void addTask(String description) {
-		tasks.put(numberOfTasks++, description);
+	private static boolean tasksWereReported = false;
+	
+	// This method resets the static state of the class:
+	public static void resetState() {
+		tasks = new HashMap<>();
+		numberOfTasks = 0;
+		lastWrittenTaskPercentage = new HashMap<>();
+		tasksWereReported = false;
+	}
+
+	public static int addTask(String description) {
+		// No new tasks should be added after they were reported:
+		if (tasksWereReported) {
+			LOGGER.warning(
+				"addTask call was ignored - No new tasks should be added after they were reported.");
+			return -1;
+		}
+
+		tasks.put(numberOfTasks, description);
+		return numberOfTasks++;
 	}
 
 	public static void reportTasks() {
+		if (tasks.isEmpty()) {
+			LOGGER.warning(
+				"reportTasks call was ignored, there are no tasks to report.");
+			return;
+		}
+
+		// The tasks should not be reported twice:
+		if (tasksWereReported) {
+			return;
+		}
+
 		try {
 			String text = "";
 
@@ -57,9 +86,19 @@ public class MPIWrapper {
 		catch (IOException exc) {
 			LOGGER.warning("" + exc.getMessage());
 		}
+
+		// The tasks should not be reported twice:
+		tasksWereReported = true;
 	}
 
 	public static int reportProgress(int taskId, int progress) {
+		// Check that task exists:
+		if (!tasks.containsKey(taskId)) {
+			LOGGER.warning("Task " + taskId +
+				" does not exist. Progress can not be reported for a task that does not exist.");
+			return -1;
+		}
+
 		// Ignore impossible new progress percentages:
 		if (progress > 100 || progress < 0) {
 			return lastWrittenTaskPercentage.get(taskId);
