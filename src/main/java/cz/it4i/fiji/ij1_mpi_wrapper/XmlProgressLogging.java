@@ -29,6 +29,8 @@ public class XmlProgressLogging implements ProgressLogging {
 	private Integer numberOfTasks = 0;
 
 	private boolean tasksWereReported = false;
+	
+	private Map<Integer, Integer> lastWrittenTaskPercentage = new HashMap<>();
 
 	private Document openXmlFile(int rank) {
 		String progressFilePath = LOG_FILE_PROGRESS_PREFIX + String.valueOf(rank) +
@@ -98,7 +100,18 @@ public class XmlProgressLogging implements ProgressLogging {
 
 	@Override
 	public void reportTasks(int rank, int size) {
-		// Create the xml document:
+		if (tasks.isEmpty()) {
+			logger.warning(
+				"reportTasks call was ignored, there are no tasks to report.");
+			return;
+		}
+
+		// The tasks should not be reported twice:
+		if (tasksWereReported) {
+			return;
+		}
+
+		// Create the XML document:
 		Document document = createXmlFile();
 
 		if (document == null) {
@@ -126,39 +139,61 @@ public class XmlProgressLogging implements ProgressLogging {
 			rootNode.appendChild(taskElement);
 		}
 
-		// Save the xml document with the reported tasks:
+		// Save the XML document with the reported tasks:
 		saveXmlFile(rank, document);
+
+		// The tasks should not be reported twice:
+		tasksWereReported = true;
 	}
 
 	@Override
 	public int reportProgress(int taskId, int progress, int rank) {
-		Document document = openXmlFile(rank);
-
-		if (document == null) {
-			logger.warning("Xml document does not exist!");
+		// Check that task exists:
+		if (!tasks.containsKey(taskId)) {
+			logger.warning("Task " + taskId +
+				" does not exist. Progress can not be reported for a task that does not exist.");
 			return -1;
 		}
 
-		// Create or update progress element for specified task:
-		Node progressNode = findNode(document, "//task[@id='" + taskId +
-			"']//progress");
-		if (progressNode == null) {
-			progressNode = document.createElement("progress");
-			progressNode.setTextContent(String.valueOf(progress));
-			Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
-			if (taskNode == null) {
-				logger.warning("Task with id " + taskId + " could not be found!");
+		// Ignore impossible new progress percentages:
+		if (progress > 100 || progress < 0) {
+			return lastWrittenTaskPercentage.get(taskId);
+		}
+
+		// Do not write progress percentage that has already been written to avoid
+		// writing gigantic progress log files:
+		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
+			progress > lastWrittenTaskPercentage.get(taskId))
+		{
+			lastWrittenTaskPercentage.put(taskId, progress);
+			Document document = openXmlFile(rank);
+
+			if (document == null) {
+				logger.warning("Xml document does not exist!");
 				return -1;
 			}
-			taskNode.appendChild(progressNode);
-		}
-		else {
-			progressNode.setTextContent(String.valueOf(progress));
-		}
 
-		// Save the document with the new progress:
-		saveXmlFile(rank, document);
+			// Create or update progress element for specified task:
+			Node progressNode = findNode(document, "//task[@id='" + taskId +
+				"']//progress");
+			if (progressNode == null) {
+				progressNode = document.createElement("progress");
+				progressNode.setTextContent(String.valueOf(progress));
+				Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
+				if (taskNode == null) {
+					logger.warning("Task with id " + taskId + " could not be found!");
+					return -1;
+				}
+				taskNode.appendChild(progressNode);
+			}
+			else {
+				progressNode.setTextContent(String.valueOf(progress));
+			}
 
+			// Save the document with the new progress:
+			saveXmlFile(rank, document);
+		}
+		
 		// success
 		return 0;
 	}
