@@ -10,12 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ProgressFileLogging implements ProgressLogging {
+public class FileProgressLogging implements ProgressLogging {
 
-	private Logger logger = Logger.getLogger(MPIWrapper.class.getName());
-
-	private static final String LOG_FILE_PROGRESS_PREFIX = "progress_";
-	private static final String LOG_FILE_REPORT_PREFIX = "report_";
+	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
 	private Map<Integer, String> tasks = new HashMap<>();
 
@@ -55,7 +52,7 @@ public class ProgressFileLogging implements ProgressLogging {
 			String text = "";
 
 			Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
-				.valueOf(rank) + ".plog");
+				.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
 
 			Files.write(progressLogFilePath, Integer.toString(size).concat(System
 				.lineSeparator()).getBytes(), StandardOpenOption.TRUNCATE_EXISTING,
@@ -100,7 +97,7 @@ public class ProgressFileLogging implements ProgressLogging {
 
 			try {
 				Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
-					.valueOf(rank) + ".plog");
+					.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
 				String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
 					progress)).concat(System.lineSeparator());
 				Files.write(progressLogFilePath, text.getBytes(),
@@ -110,20 +107,6 @@ public class ProgressFileLogging implements ProgressLogging {
 				logger.warning("reportProgress error - " + exc.getMessage());
 				return -1;
 			}
-		}
-		return 0;
-	}
-
-	@Override
-	public int reportText(String textToReport, int rank) {
-		try {
-			Files.write(Paths.get(LOG_FILE_REPORT_PREFIX + String.valueOf(rank) +
-				".tlog"), textToReport.concat(System.lineSeparator()).getBytes(),
-				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-		}
-		catch (IOException exc) {
-			logger.warning("reportText error - " + exc.getMessage());
-			return -1;
 		}
 		return 0;
 	}

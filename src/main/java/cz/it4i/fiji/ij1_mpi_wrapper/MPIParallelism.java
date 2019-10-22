@@ -11,7 +11,7 @@ import mpi.MPIException;
 
 public class MPIParallelism implements Parallelism {
 
-	private final Logger logger = Logger.getLogger(MPIWrapper.class.getName());
+	private final Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
 	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
 

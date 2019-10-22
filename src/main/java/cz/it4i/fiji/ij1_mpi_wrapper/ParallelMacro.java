@@ -1,11 +1,13 @@
 
 package cz.it4i.fiji.ij1_mpi_wrapper;
 
-public class MPIWrapper {
+public class ParallelMacro {
 
 	private static Parallelism parallelism = new MPIParallelism();
 
-	private static ProgressLogging progressLogging = new ProgressFileLogging();
+	private static ProgressLogging progressLogging = new FileProgressLogging();
+	
+	private static TextReportLogging textReportLogging = new TextReportLogging();
 
 	// This method resets the static state of the class:
 	public static void resetState() {
@@ -26,7 +28,7 @@ public class MPIWrapper {
 	}
 
 	public static int reportText(String textToReport) {
-		return progressLogging.reportText(textToReport, parallelism.getRank());
+		return textReportLogging.reportText(textToReport, parallelism.getRank());
 	}
 
 	public static int initialise() {
@@ -63,7 +65,7 @@ public class MPIWrapper {
 		return parallelism.scatter(sendString, sendCount, receiveCount, root);
 	}
 
-	private MPIWrapper() {
+	private ParallelMacro() {
 		// Empty private constructor to hide default public one.
 	}
 }
