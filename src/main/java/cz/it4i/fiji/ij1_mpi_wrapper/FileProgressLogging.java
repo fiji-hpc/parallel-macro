@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class FileProgressLogging implements ProgressLogging {
+public class FileProgressLogging extends ProgressLoggingRestrictions implements
+	ProgressLogging
+{
 
 	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
@@ -24,10 +26,7 @@ public class FileProgressLogging implements ProgressLogging {
 
 	@Override
 	public int addTask(String description) {
-		// No new tasks should be added after they were reported:
-		if (tasksWereReported) {
-			logger.warning(
-				"addTask call was ignored - No new tasks should be added after they were reported.");
+		if (!super.followsAddTaskRestrictions(tasksWereReported)) {
 			return -1;
 		}
 
@@ -37,14 +36,7 @@ public class FileProgressLogging implements ProgressLogging {
 
 	@Override
 	public void reportTasks(int rank, int size) {
-		if (tasks.isEmpty()) {
-			logger.warning(
-				"reportTasks call was ignored, there are no tasks to report.");
-			return;
-		}
-
-		// The tasks should not be reported twice:
-		if (tasksWereReported) {
+		if (!super.followsReportTasksRestrictions(tasks, tasksWereReported)) {
 			return;
 		}
 
@@ -76,10 +68,9 @@ public class FileProgressLogging implements ProgressLogging {
 
 	@Override
 	public int reportProgress(int taskId, int progress, int rank) {
-		// Check that task exists:
-		if (!tasks.containsKey(taskId)) {
-			logger.warning("Task " + taskId +
-				" does not exist. Progress can not be reported for a task that does not exist.");
+		if (!super.followsReportProgressRestrictions(tasks, taskId, progress,
+			lastWrittenTaskPercentage))
+		{
 			return -1;
 		}
 
@@ -87,26 +78,20 @@ public class FileProgressLogging implements ProgressLogging {
 		if (progress > 100 || progress < 0) {
 			return lastWrittenTaskPercentage.get(taskId);
 		}
+		
+		lastWrittenTaskPercentage.put(taskId, progress);
 
-		// Do not write progress percentage that has already been written to avoid
-		// writing gigantic progress log files:
-		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
-			progress > lastWrittenTaskPercentage.get(taskId))
-		{
-			lastWrittenTaskPercentage.put(taskId, progress);
-
-			try {
-				Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
-					.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
-				String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
-					progress)).concat(System.lineSeparator());
-				Files.write(progressLogFilePath, text.getBytes(),
-					StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-			}
-			catch (IOException exc) {
-				logger.warning("reportProgress error - " + exc.getMessage());
-				return -1;
-			}
+		try {
+			Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
+				.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
+			String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
+				progress)).concat(System.lineSeparator());
+			Files.write(progressLogFilePath, text.getBytes(),
+				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+		}
+		catch (IOException exc) {
+			logger.warning("reportProgress error - " + exc.getMessage());
+			return -1;
 		}
 		return 0;
 	}

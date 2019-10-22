@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class XmlProgressLogging implements ProgressLogging {
+public class XmlProgressLogging extends ProgressLoggingRestrictions implements
+	ProgressLogging
+{
 
 	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
@@ -29,7 +31,7 @@ public class XmlProgressLogging implements ProgressLogging {
 	private Integer numberOfTasks = 0;
 
 	private boolean tasksWereReported = false;
-	
+
 	private Map<Integer, Integer> lastWrittenTaskPercentage = new HashMap<>();
 
 	private Document openXmlFile(int rank) {
@@ -87,10 +89,7 @@ public class XmlProgressLogging implements ProgressLogging {
 
 	@Override
 	public int addTask(String description) {
-		// No new tasks should be added after they were reported:
-		if (tasksWereReported) {
-			logger.warning(
-				"addTask call was ignored - No new tasks should be added after they were reported.");
+		if (!super.followsAddTaskRestrictions(tasksWereReported)) {
 			return -1;
 		}
 
@@ -100,14 +99,7 @@ public class XmlProgressLogging implements ProgressLogging {
 
 	@Override
 	public void reportTasks(int rank, int size) {
-		if (tasks.isEmpty()) {
-			logger.warning(
-				"reportTasks call was ignored, there are no tasks to report.");
-			return;
-		}
-
-		// The tasks should not be reported twice:
-		if (tasksWereReported) {
+		if (!super.followsReportTasksRestrictions(tasks, tasksWereReported)) {
 			return;
 		}
 
@@ -148,10 +140,9 @@ public class XmlProgressLogging implements ProgressLogging {
 
 	@Override
 	public int reportProgress(int taskId, int progress, int rank) {
-		// Check that task exists:
-		if (!tasks.containsKey(taskId)) {
-			logger.warning("Task " + taskId +
-				" does not exist. Progress can not be reported for a task that does not exist.");
+		if (!super.followsReportProgressRestrictions(tasks, taskId, progress,
+			lastWrittenTaskPercentage))
+		{
 			return -1;
 		}
 
@@ -160,40 +151,34 @@ public class XmlProgressLogging implements ProgressLogging {
 			return lastWrittenTaskPercentage.get(taskId);
 		}
 
-		// Do not write progress percentage that has already been written to avoid
-		// writing gigantic progress log files:
-		if (!lastWrittenTaskPercentage.containsKey(taskId) ||
-			progress > lastWrittenTaskPercentage.get(taskId))
-		{
-			lastWrittenTaskPercentage.put(taskId, progress);
-			Document document = openXmlFile(rank);
+		lastWrittenTaskPercentage.put(taskId, progress);
+		Document document = openXmlFile(rank);
 
-			if (document == null) {
-				logger.warning("Xml document does not exist!");
+		if (document == null) {
+			logger.warning("Xml document does not exist!");
+			return -1;
+		}
+
+		// Create or update progress element for specified task:
+		Node progressNode = findNode(document, "//task[@id='" + taskId +
+			"']//progress");
+		if (progressNode == null) {
+			progressNode = document.createElement("progress");
+			progressNode.setTextContent(String.valueOf(progress));
+			Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
+			if (taskNode == null) {
+				logger.warning("Task with id " + taskId + " could not be found!");
 				return -1;
 			}
-
-			// Create or update progress element for specified task:
-			Node progressNode = findNode(document, "//task[@id='" + taskId +
-				"']//progress");
-			if (progressNode == null) {
-				progressNode = document.createElement("progress");
-				progressNode.setTextContent(String.valueOf(progress));
-				Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
-				if (taskNode == null) {
-					logger.warning("Task with id " + taskId + " could not be found!");
-					return -1;
-				}
-				taskNode.appendChild(progressNode);
-			}
-			else {
-				progressNode.setTextContent(String.valueOf(progress));
-			}
-
-			// Save the document with the new progress:
-			saveXmlFile(rank, document);
+			taskNode.appendChild(progressNode);
 		}
-		
+		else {
+			progressNode.setTextContent(String.valueOf(progress));
+		}
+
+		// Save the document with the new progress:
+		saveXmlFile(rank, document);
+
 		// success
 		return 0;
 	}
