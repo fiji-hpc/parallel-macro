@@ -5,7 +5,7 @@ public class ParallelMacro {
 
 	private static Parallelism parallelism = new MPIParallelism();
 
-	private static ProgressLogging progressLogging = new FileProgressLogging();
+	private static ProgressLogging progressLogging = null;
 	
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
@@ -13,16 +13,30 @@ public class ParallelMacro {
 	public static void resetState() {
 		parallelism = new MPIParallelism();
 	}
+	
+	public static void selectProgressLogger(String type) {
+		if(progressLogging == null) {
+			if(type.equals("xml")) {
+				progressLogging = new XmlProgressLogging();
+				return;
+			}
+			// By default use the file progress logging:
+			progressLogging = new FileProgressLogging();
+		}
+	}
 
 	public static int addTask(String description) {
+		selectProgressLogger("");
 		return progressLogging.addTask(description);
 	}
 
 	public static void reportTasks() {
+		selectProgressLogger("");
 		progressLogging.reportTasks(parallelism.getRank(), parallelism.getSize());
 	}
 
 	public static int reportProgress(int taskId, int progress) {
+		selectProgressLogger("");
 		return progressLogging.reportProgress(taskId, progress, parallelism
 			.getRank());
 	}
