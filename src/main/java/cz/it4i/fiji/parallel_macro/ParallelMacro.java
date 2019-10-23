@@ -1,11 +1,11 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper;
+package cz.it4i.fiji.parallel_macro;
 
 public class ParallelMacro {
 
 	private static Parallelism parallelism = new MPIParallelism();
 
-	private static ProgressLogging progressLogging = null;
+	private static ProgressLogging progressLogging = new XmlProgressLogging();
 	
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
@@ -16,7 +16,7 @@ public class ParallelMacro {
 	
 	public static void selectProgressLogger(String type) {
 		if(progressLogging == null) {
-			if(type.equals("xml")) {
+			if(type.equalsIgnoreCase("xml")) {
 				progressLogging = new XmlProgressLogging();
 				return;
 			}

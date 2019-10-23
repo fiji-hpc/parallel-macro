@@ -1,5 +1,5 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper;
+package cz.it4i.fiji.parallel_macro;
 
 import java.util.Map;
 import java.util.logging.Logger;

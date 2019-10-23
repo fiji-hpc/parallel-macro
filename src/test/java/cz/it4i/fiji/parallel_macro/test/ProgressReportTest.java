@@ -1,12 +1,11 @@
-package cz.it4i.fiji.ij1_mpi_wrapper.test;
+package cz.it4i.fiji.parallel_macro.test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-//import cz.it4i.fiji.ij1_mpi_wrapper.FileProgressLogging;
-import cz.it4i.fiji.ij1_mpi_wrapper.ProgressLogging;
-import cz.it4i.fiji.ij1_mpi_wrapper.XmlProgressLogging;
+import cz.it4i.fiji.parallel_macro.ProgressLogging;
+import cz.it4i.fiji.parallel_macro.XmlProgressLogging;
 
 public class ProgressReportTest {
 

@@ -1,8 +1,7 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper;
+package cz.it4i.fiji.parallel_macro;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -43,10 +42,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-			
+
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			document = dBuilder.parse(progressFilePath);
 		}
@@ -61,9 +57,6 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 			
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			document = dBuilder.newDocument();
@@ -84,9 +77,6 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 		try {
 			// Write the content into xml file:
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 			
 			Transformer transformer;
 

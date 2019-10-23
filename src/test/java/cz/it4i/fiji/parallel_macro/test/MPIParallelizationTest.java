@@ -1,4 +1,4 @@
-package cz.it4i.fiji.ij1_mpi_wrapper.test;
+package cz.it4i.fiji.parallel_macro.test;
 
 import static org.junit.Assert.*;
 
@@ -6,8 +6,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import cz.it4i.fiji.ij1_mpi_wrapper.MPIParallelism;
-import cz.it4i.fiji.ij1_mpi_wrapper.Parallelism;
+import cz.it4i.fiji.parallel_macro.MPIParallelism;
+import cz.it4i.fiji.parallel_macro.Parallelism;
 
 public class MPIParallelizationTest {
 	private static Parallelism parallelism = new MPIParallelism();

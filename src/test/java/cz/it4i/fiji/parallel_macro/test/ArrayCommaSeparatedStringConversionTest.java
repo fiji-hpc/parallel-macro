@@ -1,11 +1,11 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper.test;
+package cz.it4i.fiji.parallel_macro.test;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import cz.it4i.fiji.ij1_mpi_wrapper.ArrayCommaSeparatedString;
+import cz.it4i.fiji.parallel_macro.ArrayCommaSeparatedString;
 
 public class ArrayCommaSeparatedStringConversionTest {
 
