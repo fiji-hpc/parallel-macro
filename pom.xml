@@ -1,34 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>cz.it4i.fiji</groupId>
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>27.0.1</version>
+		<relativePath />
+	</parent>
 	<artifactId>ParallelMacro</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<name>Parallel Macro</name>
+	<description>Parallelization of Fiji Macros</description>
+	<url>https://imagej.net/Scijava-parallel</url>
+	<inceptionYear>2018</inceptionYear>
+	<organization>
+		<name>SciJava</name>
+		<url>https://scijava.org/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Simplified BSD License</name>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>it4i</id>
+			<name>it4i</name>
+			<url>https://www.it4i.cz/</url>
+			<roles>
+				<role>founder</role>
+				<role>developer</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<!-- NB: Need at least one element to override the parent. -->
+		<!-- See: https://issues.apache.org/jira/browse/MNG-5220 -->
+		<contributor>
+			<name>None</name>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/tags/scijava-parallel</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:git://github.com/fiji-hpc/scijava-parallel</connection>
+		<developerConnection>scm:git:git@github.com:fiji-hpc/scijava-parallel</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/fiji-hpc/scijava-parallel</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/fiji-hpc/scijava-parallel</url>
+	</issueManagement>
+	<ciManagement>
+		<system>none</system>
+	</ciManagement>
+
+	<!-- Add usual stuff as per SciJava projects -->
 	<properties>
 		<tests.skip>true</tests.skip>
+		<package-name>org.scijava.parallel</package-name>
+		<license.licenseName>bsd_2</license.licenseName>
+		<license.copyrightOwners>SciJava developers.</license.copyrightOwners>
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>it4i</id>
+			<url>https://artifactory.cs.vsb.cz/it4i/</url>
+		</repository>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
 
 	<build>
 		<plugins>
-
-			<!-- Use Java 8 because Fiji uses it as well -->
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
-				<configuration>
-
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
 
 			<!-- Skip Unit Test during building because they will not run with the 
 				cluster's mpi.jar on a PC -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.1</version>
 				<configuration>
 					<skipTests>${tests.skip}</skipTests>
 				</configuration>
@@ -38,7 +110,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<version>2.5</version>
 				<executions>
 					<execution>
 						<phase>initialize</phase>
@@ -56,56 +127,8 @@
 				</executions>
 			</plugin>
 
-
-			<!--This plugin's configuration is used to store Eclipse m2e settings 
-				only. It has no influence on the Maven build itself. -->
-			<plugin>
-				<groupId>org.eclipse.m2e</groupId>
-				<artifactId>lifecycle-mapping</artifactId>
-				<version>1.0.0</version>
-				<configuration>
-					<lifecycleMappingMetadata>
-						<pluginExecutions>
-							<pluginExecution>
-								<pluginExecutionFilter>
-									<groupId>org.codehaus.mojo</groupId>
-									<artifactId>aspectj-maven-plugin</artifactId>
-									<versionRange>[1.0,)</versionRange>
-									<goals>
-										<goal>test-compile</goal>
-										<goal>compile</goal>
-									</goals>
-								</pluginExecutionFilter>
-								<action>
-									<execute />
-								</action>
-							</pluginExecution>
-							<pluginExecution>
-								<pluginExecutionFilter>
-									<groupId>
-										org.apache.maven.plugins
-									</groupId>
-									<artifactId>
-										maven-install-plugin
-									</artifactId>
-									<versionRange>
-										[2.5,)
-									</versionRange>
-									<goals>
-										<goal>install-file</goal>
-									</goals>
-								</pluginExecutionFilter>
-								<action>
-									<execute>
-										<runOnIncremental>false</runOnIncremental>
-									</execute>
-								</action>
-							</pluginExecution>
-						</pluginExecutions>
-					</lifecycleMappingMetadata>
-				</configuration>
-			</plugin>
-
+			<!-- Create a fat jar file, the MPI dependency must be included in the 
+				jar package: -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -128,26 +151,66 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
-
-
 	</build>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/junit/junit -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- Add the mpi.jar from the HPC cluster -->
 		<dependency>
 			<groupId>org.open-mpi</groupId>
 			<artifactId>mpi</artifactId>
 			<version>4.0.1</version>
 		</dependency>
+		<!-- ImageJ Legacy -->
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-legacy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>it4i-fiji</groupId>
+			<artifactId>it4i-common</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-plugins-commands</artifactId>
+		</dependency>
+		<!-- SciJava dependencies -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>cz.it4i.fiji</groupId>
+			<artifactId>scp-java-client</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>it4i</id>
+			<url>https://artifactory.cs.vsb.cz/it4i/</url>
+		</repository>
+	</distributionManagement>
 </project>
