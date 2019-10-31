@@ -104,7 +104,7 @@ public class MPIParallelism implements Parallelism {
 
 		int tag = 99;
 		Datatype datatype = findDatatype(sendBuffer);
-		
+
 		// The sender should send the correct amount of elements to each node:
 		if (getRank() == sender) {
 			int offset = 0;
@@ -115,7 +115,8 @@ public class MPIParallelism implements Parallelism {
 					sendCount += totalSendBufferLength % size;
 				}
 				try {
-					double[] newSendBuffer = Arrays.copyOfRange(sendBuffer, offset, sendBuffer.length);
+					double[] newSendBuffer = Arrays.copyOfRange(sendBuffer, offset,
+						sendBuffer.length);
 					MPI.COMM_WORLD.send(newSendBuffer, sendCount, datatype, destination,
 						tag);
 				}
@@ -195,5 +196,46 @@ public class MPIParallelism implements Parallelism {
 			logger.warning(exc.getMessage());
 		}
 		return receiveBuffer;
+	}
+
+	private Object gatherArray(Object sendBuffer, int sendCount, int receiveCount,
+		int root)
+	{
+		// The receive buffer will be of the same type as the send buffer:
+		Object receiveBuffer = null;
+		// Only the specified node will gather the send items:
+		if(getRank() == root) {
+			receiveBuffer = Array.newInstance(sendBuffer.getClass()
+			.getComponentType(), receiveCount*getSize());
+		}
+
+		try {
+			Datatype sendType = findDatatype(sendBuffer);
+			Datatype receiveType = sendType;
+
+			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType, receiveBuffer,
+				receiveCount, receiveType, root);
+		}
+		catch (MPIException exc) {
+			logger.warning(exc.getMessage());
+		}
+		return receiveBuffer;
+	}
+
+	@Override
+	public String gather(String sendString, int sendCount, int receiveCount,
+		int root)
+	{
+		double[] sendBuffer;
+		if (!sendString.isEmpty()) {
+			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
+		}
+		else {
+			sendBuffer = new double[0];
+		}
+
+		double[] receiveBuffer = (double[]) gatherArray(sendBuffer, sendCount,
+			receiveCount, root);
+		return converter.convertArrayToCommaSeparatedString(receiveBuffer);
 	}
 }

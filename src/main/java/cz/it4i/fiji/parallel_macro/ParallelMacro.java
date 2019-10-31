@@ -78,6 +78,11 @@ public class ParallelMacro {
 	{
 		return parallelism.scatter(sendString, sendCount, receiveCount, root);
 	}
+	
+	public static String gather(String sendString, int sendCount,
+		int receiveCount, int root) {
+		return parallelism.gather(sendString, sendCount, receiveCount, root);
+	}
 
 	private ParallelMacro() {
 		// Empty private constructor to hide default public one.
