@@ -12,11 +12,11 @@ public class ParallelMacroExtensions implements MacroExtension, Command {
 
 	@Override
 	public String handleExtension(String name, Object[] args) {
-		MyMacroExtensionDescriptor[] functionList = MyFunctions.list;
+		MyMacroExtensionDescriptor[] functionList = FunctionsList.getList();
 
-		// go through function list an check if we know the called function
+		// go through function list and check if we know the called function
 		for (MyMacroExtensionDescriptor function : functionList) {
-			String command = MyFunctions.MACRO_EXTENSION_PREFIX + function.getClass()
+			String command = FunctionsList.MACRO_EXTENSION_PREFIX + function.getClass()
 				.getSimpleName();
 
 			// if name matches exactly
@@ -31,7 +31,7 @@ public class ParallelMacroExtensions implements MacroExtension, Command {
 
 	@Override
 	public ExtensionDescriptor[] getExtensionFunctions() {
-		MyMacroExtensionDescriptor[] pluginList = MyFunctions.list;
+		MyMacroExtensionDescriptor[] pluginList = FunctionsList.getList();
 
 		ExtensionDescriptor[] result = new ExtensionDescriptor[pluginList.length];
 
@@ -39,7 +39,7 @@ public class ParallelMacroExtensions implements MacroExtension, Command {
 		// formulate a list of ExtensionDescriptors describing all command this
 		// class can handle
 		for (MyMacroExtensionDescriptor function : pluginList) {
-			String call = MyFunctions.MACRO_EXTENSION_PREFIX + function.getClass()
+			String call = FunctionsList.MACRO_EXTENSION_PREFIX + function.getClass()
 				.getSimpleName();
 			result[i] = new ExtensionDescriptor(call, function.parameterTypes(),
 				this);
