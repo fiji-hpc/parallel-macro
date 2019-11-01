@@ -5,7 +5,7 @@ public class ParallelMacro {
 
 	private static Parallelism parallelism = new MPIParallelism();
 
-	private static ProgressLogging progressLogging = new XmlProgressLogging();
+	private static ProgressLogging progressLogging = null;
 	
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
