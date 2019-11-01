@@ -2,7 +2,6 @@
 package cz.it4i.fiji.parallel_macro;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import mpi.Datatype;
@@ -84,13 +83,8 @@ public class MPIParallelism implements Parallelism {
 		int sender)
 	{
 		// Convert comma separated string to array:
-		double[] sendBuffer;
-		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
-		}
-		else {
-			sendBuffer = new double[0];
-		}
+		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+			sendString);
 
 		int size = getSize();
 
@@ -102,35 +96,29 @@ public class MPIParallelism implements Parallelism {
 			receiveCount += totalSendBufferLength % size;
 		}
 
-		int tag = 99;
 		Datatype datatype = findDatatype(sendBuffer);
 
 		// The sender should send the correct amount of elements to each node:
+		int[] sendCounts = new int[getSize()];
+		int[] displacements = new int[getSize()];
 		if (getRank() == sender) {
-			int offset = 0;
 			int sendCount = 0;
+			int offset = 0;
 			for (int destination = 0; destination < size; destination++) {
 				sendCount = totalSendBufferLength / size;
 				if (destination == 0) {
 					sendCount += totalSendBufferLength % size;
 				}
-				try {
-					double[] newSendBuffer = Arrays.copyOfRange(sendBuffer, offset,
-						sendBuffer.length);
-					MPI.COMM_WORLD.send(newSendBuffer, sendCount, datatype, destination,
-						tag);
-				}
-				catch (MPIException exc) {
-					logger.warning(exc.getMessage());
-				}
+				sendCounts[destination] = sendCount;
+				displacements[destination] = offset;
 				offset += sendCount;
 			}
 		}
 
-		// Receive your share of the elements:
 		double[] receivedBuffer = new double[receiveCount];
 		try {
-			MPI.COMM_WORLD.recv(receivedBuffer, receiveCount, datatype, sender, tag);
+			MPI.COMM_WORLD.scatterv(sendBuffer, sendCounts, displacements, datatype,
+				receivedBuffer, receiveCount, datatype, sender);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -204,9 +192,9 @@ public class MPIParallelism implements Parallelism {
 		// The receive buffer will be of the same type as the send buffer:
 		Object receiveBuffer = null;
 		// Only the specified node will gather the send items:
-		if(getRank() == root) {
+		if (getRank() == root) {
 			receiveBuffer = Array.newInstance(sendBuffer.getClass()
-			.getComponentType(), receiveCount*getSize());
+				.getComponentType(), receiveCount * getSize());
 		}
 
 		try {

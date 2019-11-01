@@ -21,8 +21,11 @@ public class ArrayCommaSeparatedString {
 	}
 
 	public double[] convertCommaSeparatedStringToArray(String string) {
+		if(!string.isEmpty()) {
 		String[] arrayString = string.split(",");
 		return Arrays.stream(arrayString).mapToDouble(Double::parseDouble)
 			.toArray();
+		}
+		return new double[0];
 	}
 }
