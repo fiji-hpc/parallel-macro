@@ -87,28 +87,22 @@ public class MPIParallelism implements Parallelism {
 			sendString);
 
 		int size = getSize();
+		int myRank = getRank();
 
 		// Divide work to equal parts:
-		int receiveCount = totalSendBufferLength / size;
-
-		// Any additional remaining items should be given to rank 0:
-		if (getRank() == 0) {
-			receiveCount += totalSendBufferLength % size;
-		}
+		int receiveCount = getEqualAmountOfWork(myRank, size,
+			totalSendBufferLength);
 
 		Datatype datatype = findDatatype(sendBuffer);
 
 		// The sender should send the correct amount of elements to each node:
-		int[] sendCounts = new int[getSize()];
-		int[] displacements = new int[getSize()];
-		if (getRank() == sender) {
+		int[] sendCounts = new int[size];
+		int[] displacements = new int[size];
+		if (myRank == sender) {
 			int sendCount = 0;
 			int offset = 0;
 			for (int destination = 0; destination < size; destination++) {
-				sendCount = totalSendBufferLength / size;
-				if (destination == 0) {
-					sendCount += totalSendBufferLength % size;
-				}
+				sendCount = getEqualAmountOfWork(destination, size, totalSendBufferLength);
 				sendCounts[destination] = sendCount;
 				displacements[destination] = offset;
 				offset += sendCount;
@@ -225,5 +219,58 @@ public class MPIParallelism implements Parallelism {
 		double[] receiveBuffer = (double[]) gatherArray(sendBuffer, sendCount,
 			receiveCount, root);
 		return converter.convertArrayToCommaSeparatedString(receiveBuffer);
+	}
+
+	@Override
+	public String gatherEqually(String sendString, int totalReceiveBufferLength,
+		int receiver)
+	{
+		// Convert comma separated string to array:
+		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+			sendString);
+
+		int size = getSize();
+
+		Datatype datatype = findDatatype(sendBuffer);
+
+		int[] receiveCounts = new int[size];
+		int[] displacements = new int[size];
+		int sendCount = 0;
+		int offset = 0;
+		for (int destination = 0; destination < size; destination++) {
+			sendCount = getEqualAmountOfWork(destination, size, totalReceiveBufferLength);
+			receiveCounts[destination] = sendCount;
+			displacements[destination] = offset;
+			offset += sendCount;
+		}
+
+		double[] receivedBuffer;
+		if (getRank() == receiver) {
+			receivedBuffer = new double[totalReceiveBufferLength];
+		} else
+		{
+			receivedBuffer = new double[0];
+		}
+		try {
+			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount, datatype, receivedBuffer,
+				receiveCounts, displacements, datatype, receiver);
+		}
+		catch (MPIException exc) {
+			logger.warning(exc.getMessage());
+		}
+
+		// Convert back to string and return:
+		return converter.convertArrayToCommaSeparatedString(receivedBuffer);
+	}
+
+	private int getEqualAmountOfWork(int myRank, int size, int totalSizeOfWork) {
+		// Divide work to equal parts:
+		int sizeOfWorkPart = totalSizeOfWork / size;
+
+		// Any additional remaining items should be given to rank 0:
+		if (myRank == 0) {
+			sizeOfWorkPart += totalSizeOfWork % size;
+		}
+		return sizeOfWorkPart;
 	}
 }
