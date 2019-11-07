@@ -1,7 +1,7 @@
 
 package cz.it4i.fiji.parallel_macro;
 
-import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class ArrayCommaSeparatedString {
 
@@ -21,11 +21,8 @@ public class ArrayCommaSeparatedString {
 	}
 
 	public double[] convertCommaSeparatedStringToArray(String string) {
-		if(!string.isEmpty()) {
-		String[] arrayString = string.split(",");
-		return Arrays.stream(arrayString).mapToDouble(Double::parseDouble)
+		Pattern pattern = Pattern.compile(",");
+		return pattern.splitAsStream(string).mapToDouble(Double::parseDouble)
 			.toArray();
-		}
-		return new double[0];
 	}
 }
