@@ -83,8 +83,10 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			node.setTextContent(Long.toString(timestamp));
 		}
 		else {
-			Element element = document.createElement("lastUpdated");
-			element.setTextContent(Long.toString(timestamp));
+			Node rootNode = document.getElementsByTagName("job").item(0);
+			Element timestampElement = document.createElement("lastUpdated");
+			timestampElement.setTextContent(Long.toString(timestamp));
+			rootNode.appendChild(timestampElement);
 		}
 	}
 
