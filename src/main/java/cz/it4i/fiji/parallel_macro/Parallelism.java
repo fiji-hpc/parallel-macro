@@ -18,4 +18,10 @@ public interface Parallelism {
 
 	public String scatter(String sendString, int sendCount, int receiveCount,
 		int root);
+
+	public String gather(String sendString, int sendCount, int receiveCount,
+		int root);
+
+	public String gatherEqually(String sendString, int totalSendBufferLength,
+		int root);
 }

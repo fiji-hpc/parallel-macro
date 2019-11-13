@@ -2,7 +2,6 @@
 package cz.it4i.fiji.parallel_macro;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import mpi.Datatype;
@@ -84,52 +83,36 @@ public class MPIParallelism implements Parallelism {
 		int sender)
 	{
 		// Convert comma separated string to array:
-		double[] sendBuffer;
-		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
-		}
-		else {
-			sendBuffer = new double[0];
-		}
+		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+			sendString);
 
 		int size = getSize();
+		int myRank = getRank();
 
 		// Divide work to equal parts:
-		int receiveCount = totalSendBufferLength / size;
+		int receiveCount = getEqualAmountOfWork(myRank, size,
+			totalSendBufferLength);
 
-		// Any additional remaining items should be given to rank 0:
-		if (getRank() == 0) {
-			receiveCount += totalSendBufferLength % size;
-		}
-
-		int tag = 99;
 		Datatype datatype = findDatatype(sendBuffer);
-		
+
 		// The sender should send the correct amount of elements to each node:
-		if (getRank() == sender) {
-			int offset = 0;
+		int[] sendCounts = new int[size];
+		int[] displacements = new int[size];
+		if (myRank == sender) {
 			int sendCount = 0;
+			int offset = 0;
 			for (int destination = 0; destination < size; destination++) {
-				sendCount = totalSendBufferLength / size;
-				if (destination == 0) {
-					sendCount += totalSendBufferLength % size;
-				}
-				try {
-					double[] newSendBuffer = Arrays.copyOfRange(sendBuffer, offset, sendBuffer.length);
-					MPI.COMM_WORLD.send(newSendBuffer, sendCount, datatype, destination,
-						tag);
-				}
-				catch (MPIException exc) {
-					logger.warning(exc.getMessage());
-				}
+				sendCount = getEqualAmountOfWork(destination, size, totalSendBufferLength);
+				sendCounts[destination] = sendCount;
+				displacements[destination] = offset;
 				offset += sendCount;
 			}
 		}
 
-		// Receive your share of the elements:
 		double[] receivedBuffer = new double[receiveCount];
 		try {
-			MPI.COMM_WORLD.recv(receivedBuffer, receiveCount, datatype, sender, tag);
+			MPI.COMM_WORLD.scatterv(sendBuffer, sendCounts, displacements, datatype,
+				receivedBuffer, receiveCount, datatype, sender);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -195,5 +178,99 @@ public class MPIParallelism implements Parallelism {
 			logger.warning(exc.getMessage());
 		}
 		return receiveBuffer;
+	}
+
+	private Object gatherArray(Object sendBuffer, int sendCount, int receiveCount,
+		int root)
+	{
+		// The receive buffer will be of the same type as the send buffer:
+		Object receiveBuffer = null;
+		// Only the specified node will gather the send items:
+		if (getRank() == root) {
+			receiveBuffer = Array.newInstance(sendBuffer.getClass()
+				.getComponentType(), receiveCount * getSize());
+		}
+
+		try {
+			Datatype sendType = findDatatype(sendBuffer);
+			Datatype receiveType = sendType;
+
+			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType, receiveBuffer,
+				receiveCount, receiveType, root);
+		}
+		catch (MPIException exc) {
+			logger.warning(exc.getMessage());
+		}
+		return receiveBuffer;
+	}
+
+	@Override
+	public String gather(String sendString, int sendCount, int receiveCount,
+		int root)
+	{
+		double[] sendBuffer;
+		if (!sendString.isEmpty()) {
+			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
+		}
+		else {
+			sendBuffer = new double[0];
+		}
+
+		double[] receiveBuffer = (double[]) gatherArray(sendBuffer, sendCount,
+			receiveCount, root);
+		return converter.convertArrayToCommaSeparatedString(receiveBuffer);
+	}
+
+	@Override
+	public String gatherEqually(String sendString, int totalReceiveBufferLength,
+		int receiver)
+	{
+		// Convert comma separated string to array:
+		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+			sendString);
+
+		int size = getSize();
+
+		Datatype datatype = findDatatype(sendBuffer);
+
+		int[] receiveCounts = new int[size];
+		int[] displacements = new int[size];
+		int sendCount = 0;
+		int offset = 0;
+		for (int destination = 0; destination < size; destination++) {
+			sendCount = getEqualAmountOfWork(destination, size, totalReceiveBufferLength);
+			receiveCounts[destination] = sendCount;
+			displacements[destination] = offset;
+			offset += sendCount;
+		}
+
+		double[] receivedBuffer;
+		if (getRank() == receiver) {
+			receivedBuffer = new double[totalReceiveBufferLength];
+		} else
+		{
+			receivedBuffer = new double[0];
+		}
+		try {
+			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount, datatype, receivedBuffer,
+				receiveCounts, displacements, datatype, receiver);
+		}
+		catch (MPIException exc) {
+			logger.warning(exc.getMessage());
+		}
+
+		// Convert back to string and return:
+		return converter.convertArrayToCommaSeparatedString(receivedBuffer);
+	}
+
+	private int getEqualAmountOfWork(int myRank, int size, int totalSizeOfWork) {
+		// Divide work to equal parts:
+		int sizeOfWorkPart = totalSizeOfWork / size;
+
+		// Any additional remaining items should be given to rank 0:
+		if (myRank == 0) {
+			sizeOfWorkPart += totalSizeOfWork % size;
+		}
+		return sizeOfWorkPart;
 	}
 }

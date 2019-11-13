@@ -13,10 +13,10 @@ public class ParallelMacro {
 	public static void resetState() {
 		parallelism = new MPIParallelism();
 	}
-	
+
 	public static void selectProgressLogger(String type) {
-		if(progressLogging == null) {
-			if(type.equalsIgnoreCase("xml")) {
+		if (progressLogging == null) {
+			if (type.equalsIgnoreCase("xml")) {
 				progressLogging = new XmlProgressLogging();
 				return;
 			}
@@ -77,6 +77,18 @@ public class ParallelMacro {
 		int receiveCount, int root)
 	{
 		return parallelism.scatter(sendString, sendCount, receiveCount, root);
+	}
+
+	public static String gather(String sendString, int sendCount,
+		int receiveCount, int root)
+	{
+		return parallelism.gather(sendString, sendCount, receiveCount, root);
+	}
+
+	public static String gatherEqually(String sendString,
+		int totalSendBufferLength, int root)
+	{
+		return parallelism.gatherEqually(sendString, totalSendBufferLength, root);
 	}
 
 	private ParallelMacro() {
