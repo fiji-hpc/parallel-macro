@@ -1,32 +1,48 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper;
+package cz.it4i.fiji.parallel_macro;
 
-public class MPIWrapper {
+public class ParallelMacro {
 
 	private static Parallelism parallelism = new MPIParallelism();
 
-	private static ProgressLogging progressLogging = new ProgressFileLogging();
+	private static ProgressLogging progressLogging = null;
+	
+	private static TextReportLogging textReportLogging = new TextReportLogging();
 
 	// This method resets the static state of the class:
 	public static void resetState() {
 		parallelism = new MPIParallelism();
 	}
+	
+	public static void selectProgressLogger(String type) {
+		if(progressLogging == null) {
+			if(type.equalsIgnoreCase("xml")) {
+				progressLogging = new XmlProgressLogging();
+				return;
+			}
+			// By default use the file progress logging:
+			progressLogging = new FileProgressLogging();
+		}
+	}
 
 	public static int addTask(String description) {
+		selectProgressLogger("");
 		return progressLogging.addTask(description);
 	}
 
 	public static void reportTasks() {
+		selectProgressLogger("");
 		progressLogging.reportTasks(parallelism.getRank(), parallelism.getSize());
 	}
 
 	public static int reportProgress(int taskId, int progress) {
+		selectProgressLogger("");
 		return progressLogging.reportProgress(taskId, progress, parallelism
 			.getRank());
 	}
 
 	public static int reportText(String textToReport) {
-		return progressLogging.reportText(textToReport, parallelism.getRank());
+		return textReportLogging.reportText(textToReport, parallelism.getRank());
 	}
 
 	public static int initialise() {
@@ -63,7 +79,7 @@ public class MPIWrapper {
 		return parallelism.scatter(sendString, sendCount, receiveCount, root);
 	}
 
-	private MPIWrapper() {
+	private ParallelMacro() {
 		// Empty private constructor to hide default public one.
 	}
 }

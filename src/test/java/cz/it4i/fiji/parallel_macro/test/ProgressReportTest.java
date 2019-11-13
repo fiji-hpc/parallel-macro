@@ -1,16 +1,23 @@
-package cz.it4i.fiji.ij1_mpi_wrapper.test;
+package cz.it4i.fiji.parallel_macro.test;
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 
-import cz.it4i.fiji.ij1_mpi_wrapper.ProgressFileLogging;
-import cz.it4i.fiji.ij1_mpi_wrapper.ProgressLogging;
+import cz.it4i.fiji.parallel_macro.ProgressLogging;
+import cz.it4i.fiji.parallel_macro.XmlProgressLogging;
 
 public class ProgressReportTest {
 
+	private ProgressLogging progressLogging;
+	
+	@Before
+	public void initializeProgressLogging() {
+		progressLogging = new XmlProgressLogging();
+	}
+	
 	@Test
 	public void progressShouldBeReportedOnlyIfTaskExists() {
-		ProgressLogging progressLogging = new ProgressFileLogging();
 		int rank = 0;
 		
 		progressLogging.reportProgress(0, 100, rank);
@@ -18,7 +25,6 @@ public class ProgressReportTest {
 
 	@Test
 	public void tasksShouldBeReportedOnlyIfAtLeastOneExists() {
-		ProgressLogging progressLogging = new ProgressFileLogging();
 		int rank = 0;
 		int size = 8;
 		
@@ -27,7 +33,6 @@ public class ProgressReportTest {
 
 	@Test
 	public void tasksShouldBeReportedOnlyOnce() {
-		ProgressLogging progressLogging = new ProgressFileLogging();
 		int rank = 0;
 		int size = 8;
 		
@@ -38,7 +43,6 @@ public class ProgressReportTest {
 
 	@Test
 	public void addingTasksAfterTheyHaveBeenReportedShouldNotBePossible() {
-		ProgressFileLogging progressLogging = new ProgressFileLogging();
 		int rank = 0;
 		int size = 8;
 		
@@ -50,7 +54,6 @@ public class ProgressReportTest {
 
 	@Test
 	public void correctIdShouldBeAssignedToTaskWhenAdded() {
-		ProgressFileLogging progressLogging = new ProgressFileLogging();
 		progressLogging.addTask("Task one.");
 		progressLogging.addTask("Task two.");
 		int id = progressLogging.addTask("Task three.");

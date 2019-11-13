@@ -1,5 +1,5 @@
 
-package cz.it4i.fiji.ij1_mpi_wrapper;
+package cz.it4i.fiji.parallel_macro;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import mpi.MPIException;
 
 public class MPIParallelism implements Parallelism {
 
-	private final Logger logger = Logger.getLogger(MPIWrapper.class.getName());
+	private final Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
 	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
 
