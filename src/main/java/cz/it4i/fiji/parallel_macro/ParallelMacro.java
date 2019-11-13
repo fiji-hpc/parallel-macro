@@ -16,12 +16,12 @@ public class ParallelMacro {
 
 	public static void selectProgressLogger(String type) {
 		if (progressLogging == null) {
-			if (type.equalsIgnoreCase("xml")) {
-				progressLogging = new XmlProgressLogging();
+			if (type.equalsIgnoreCase("file")) {
+				progressLogging = new FileProgressLogging();
 				return;
 			}
-			// By default use the file progress logging:
-			progressLogging = new FileProgressLogging();
+			// By default use the XML progress logging:
+			progressLogging = new XmlProgressLogging();
 		}
 	}
 

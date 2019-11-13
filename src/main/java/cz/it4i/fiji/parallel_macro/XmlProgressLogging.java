@@ -15,6 +15,8 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +59,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			
+
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			document = dBuilder.newDocument();
 
@@ -71,13 +73,32 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 		return document;
 	}
 
+	private void updateLastUpdatedTimestamp(Document document) {
+		NodeList nodeList = document.getElementsByTagName("lastUpdated");
+		long timestamp = java.time.Instant.now().toEpochMilli();
+		// Update the time-stamp if the XML element already exists or create it if
+		// it does not:
+		if (nodeList.getLength() != 0) {
+			Node node = nodeList.item(0);
+			node.setTextContent(Long.toString(timestamp));
+		}
+		else {
+			Element element = document.createElement("lastUpdated");
+			element.setTextContent(Long.toString(timestamp));
+		}
+	}
+
 	private void saveXmlFile(int rank, Document document) {
+		// Before saving to a file update the "last updated" time-stamp:
+		updateLastUpdatedTimestamp(document);
+
+		// Save the XML to file:
 		String progressFilePath = LOG_FILE_PROGRESS_PREFIX + String.valueOf(rank) +
 			LOG_FILE_PROGRESS_POSTFIX;
 		try {
 			// Write the content into xml file:
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			
+
 			Transformer transformer;
 
 			transformer = transformerFactory.newTransformer();
