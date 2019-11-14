@@ -2,6 +2,7 @@
 package cz.it4i.fiji.parallel_macro;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,10 +47,17 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 			Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
 				.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
 
+			// Write the number of nodes on the first line of the progress log
 			Files.write(progressLogFilePath, Integer.toString(size).concat(System
 				.lineSeparator()).getBytes(), StandardOpenOption.TRUNCATE_EXISTING,
 				StandardOpenOption.CREATE);
 
+			// Write the first time-stamp:
+			Files.write(progressLogFilePath, Long.toString(java.time.Instant.now()
+				.toEpochMilli()).concat(System.lineSeparator()).getBytes(),
+				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+
+			// Report the tasks one by ones id each along with its description:
 			for (Integer counter = 0; counter < numberOfTasks; counter++) {
 				text = String.valueOf(counter).concat(",").concat(tasks.get(counter))
 					.concat(System.lineSeparator());
@@ -78,7 +86,7 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 		if (progress > 100 || progress < 0) {
 			return lastWrittenTaskPercentage.get(taskId);
 		}
-		
+
 		lastWrittenTaskPercentage.put(taskId, progress);
 
 		try {
@@ -88,12 +96,28 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 				progress)).concat(System.lineSeparator());
 			Files.write(progressLogFilePath, text.getBytes(),
 				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+			updateLastUpdatedTimestamp(rank); // Note the time-stamp of the update
 		}
 		catch (IOException exc) {
 			logger.warning("reportProgress error - " + exc.getMessage());
 			return -1;
 		}
 		return 0;
+	}
+
+	private void updateLastUpdatedTimestamp(int rank) {
+		try (RandomAccessFile writer = new RandomAccessFile(
+			LOG_FILE_PROGRESS_PREFIX + String.valueOf(rank) +
+				LOG_FILE_PROGRESS_POSTFIX, "rw"))
+		{
+			writer.readLine(); // Ignore, the first line is the number of nodes.
+			writer.writeBytes(Long.toString(java.time.Instant.now().toEpochMilli())
+				.concat(System.lineSeparator()));
+		}
+		catch (IOException exc) {
+			logger.warning("updateLastUpdatedTimestamp error - " + exc.getMessage());
+		}
+
 	}
 
 }
