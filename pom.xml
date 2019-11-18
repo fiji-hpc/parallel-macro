@@ -131,22 +131,20 @@
 				jar package: -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<archive>
-								<manifest>
-
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
+							<artifactSet>
+								<includes>
+									<include>org.open-mpi</include>
+								</includes>
+							</artifactSet>
 						</configuration>
 					</execution>
 				</executions>
