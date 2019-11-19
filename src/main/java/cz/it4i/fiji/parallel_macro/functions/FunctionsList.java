@@ -8,7 +8,8 @@ public class FunctionsList {
 	public static final String MACRO_EXTENSION_PREFIX = "par";
 
 	// list of all available functions
-	private static MyMacroExtensionDescriptor[] list = { new ReportText(), new PrintArray() };
+	private static MyMacroExtensionDescriptor[] list = { new Initialise(),
+		new ReportText(), new PrintArray(), new Finalise(), new Flip() };
 
 	public static MyMacroExtensionDescriptor[] getList() {
 		return list;

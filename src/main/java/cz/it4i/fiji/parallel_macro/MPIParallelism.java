@@ -13,6 +13,19 @@ public class MPIParallelism implements Parallelism {
 	private final Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
 	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
+	
+	private static MPIParallelism mpiParallelism = null;
+	
+	private MPIParallelism() {
+		// Empty private constructor to hide the implicit public one.
+	}
+	
+	public static MPIParallelism getMPIParallelism() {
+		if(mpiParallelism == null) {
+			mpiParallelism = new MPIParallelism();
+		}
+		return mpiParallelism;
+	}
 
 	@Override
 	public int initialise() {

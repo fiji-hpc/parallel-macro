@@ -3,16 +3,11 @@ package cz.it4i.fiji.parallel_macro;
 
 public class ParallelMacro {
 
-	private static Parallelism parallelism = new MPIParallelism();
+	private static Parallelism parallelism = MPIParallelism.getMPIParallelism();
 
 	private static ProgressLogging progressLogging = null;
-	
-	private static TextReportLogging textReportLogging = new TextReportLogging();
 
-	// This method resets the static state of the class:
-	public static void resetState() {
-		parallelism = new MPIParallelism();
-	}
+	private static TextReportLogging textReportLogging = new TextReportLogging();
 
 	public static void selectProgressLogger(String type) {
 		if (progressLogging == null) {
