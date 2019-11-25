@@ -1,16 +1,18 @@
 
 package cz.it4i.fiji.parallel_macro;
 
+import java.nio.DoubleBuffer;
 import java.util.regex.Pattern;
+
+import mpi.MPI;
 
 public class ArrayCommaSeparatedString {
 
-	public String convertArrayToCommaSeparatedString(double[] array) {
-		if (array != null) {
-			int length = array.length;
+	public String convertBufferToCommaSeparatedString(DoubleBuffer buffer, int length) {
+		if (buffer != null) {
 			StringBuilder bld = new StringBuilder();
 			for (int i = 0; i < length; i++) {
-				bld.append(array[i]);
+				bld.append(buffer.get(i));
 				if (i != length - 1) {
 					bld.append(", ");
 				}
@@ -20,9 +22,14 @@ public class ArrayCommaSeparatedString {
 		return "";
 	}
 
-	public double[] convertCommaSeparatedStringToArray(String string) {
+	public DoubleBuffer convertCommaSeparatedStringToBuffer(String string) {
 		Pattern pattern = Pattern.compile(",");
-		return pattern.splitAsStream(string).mapToDouble(Double::parseDouble)
-			.toArray();
+		double[] tempArray = pattern.splitAsStream(string).mapToDouble(Double::parseDouble)
+		.toArray();
+		DoubleBuffer tempBuffer = MPI.newDoubleBuffer(tempArray.length);
+		for(int i = 0; i < tempArray.length; i++) {
+			tempBuffer.put(tempArray[i]);
+		}
+		return tempBuffer;
 	}
 }

@@ -3,6 +3,8 @@ package cz.it4i.fiji.parallel_macro.test;
 
 import static org.junit.Assert.*;
 
+import java.nio.DoubleBuffer;
+
 import org.junit.Test;
 
 import cz.it4i.fiji.parallel_macro.ArrayCommaSeparatedString;
@@ -14,8 +16,8 @@ public class ArrayCommaSeparatedStringConversionTest {
 		double[] originalArray = { 10.0, 20.0, 30.0 };
 
 		ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
-		String convertedString = converter.convertArrayToCommaSeparatedString(
-			originalArray);
+		String convertedString = converter.convertBufferToCommaSeparatedString(
+			DoubleBuffer.wrap(originalArray), 3);
 		assertEquals("10.0, 20.0, 30.0", convertedString);
 	}
 
@@ -25,10 +27,10 @@ public class ArrayCommaSeparatedStringConversionTest {
 		double[] expectedArray = { 40.0, 50.0, 60.0, 70.0 };
 
 		ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
-		double[] convertedArray = converter.convertCommaSeparatedStringToArray(
+		DoubleBuffer convertedArray = converter.convertCommaSeparatedStringToBuffer(
 			originalString);
 
-		assertArrayEquals(expectedArray, convertedArray, 0.0);
+		assertArrayEquals(expectedArray, convertedArray.array(), 0.0);
 	}
 	
 	@Test
@@ -41,10 +43,10 @@ public class ArrayCommaSeparatedStringConversionTest {
 		}
 		
 		ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
-		String myBigString = converter.convertArrayToCommaSeparatedString(myBigArray);
-		double[] myRecreatedBigArray = converter.convertCommaSeparatedStringToArray(myBigString);
+		String myBigString = converter.convertBufferToCommaSeparatedString(DoubleBuffer.wrap(myBigArray), size);
+		DoubleBuffer myRecreatedBigArray = converter.convertCommaSeparatedStringToBuffer(myBigString);
 		
-		assertArrayEquals(myBigArray, myRecreatedBigArray, 0.0);
+		assertArrayEquals(myBigArray, myRecreatedBigArray.array(), 0.0);
 	}
 
 }

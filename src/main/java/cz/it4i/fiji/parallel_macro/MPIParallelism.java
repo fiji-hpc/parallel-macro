@@ -1,7 +1,7 @@
 
 package cz.it4i.fiji.parallel_macro;
 
-import java.lang.reflect.Array;
+import java.nio.DoubleBuffer;
 import java.util.logging.Logger;
 
 import mpi.Datatype;
@@ -82,8 +82,8 @@ public class MPIParallelism implements Parallelism {
 	public String scatterEqually(String sendString, int totalSendBufferLength,
 		int sender)
 	{
-		// Convert comma separated string to array:
-		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+		// Convert comma separated string to double buffer:
+		DoubleBuffer sendBuffer = converter.convertCommaSeparatedStringToBuffer(
 			sendString);
 
 		int size = getSize();
@@ -93,8 +93,6 @@ public class MPIParallelism implements Parallelism {
 		int receiveCount = getEqualAmountOfWork(myRank, size,
 			totalSendBufferLength);
 
-		Datatype datatype = findDatatype(sendBuffer);
-
 		// The sender should send the correct amount of elements to each node:
 		int[] sendCounts = new int[size];
 		int[] displacements = new int[size];
@@ -102,77 +100,58 @@ public class MPIParallelism implements Parallelism {
 			int sendCount = 0;
 			int offset = 0;
 			for (int destination = 0; destination < size; destination++) {
-				sendCount = getEqualAmountOfWork(destination, size, totalSendBufferLength);
+				sendCount = getEqualAmountOfWork(destination, size,
+					totalSendBufferLength);
 				sendCounts[destination] = sendCount;
 				displacements[destination] = offset;
 				offset += sendCount;
 			}
 		}
 
-		double[] receivedBuffer = new double[receiveCount];
+		DoubleBuffer receiveBuffer = MPI.newDoubleBuffer(receiveCount);
 		try {
-			MPI.COMM_WORLD.scatterv(sendBuffer, sendCounts, displacements, datatype,
-				receivedBuffer, receiveCount, datatype, sender);
+			MPI.COMM_WORLD.scatterv(sendBuffer, sendCounts, displacements, MPI.DOUBLE,
+				receiveBuffer, receiveCount, MPI.DOUBLE, sender);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
 		}
 
 		// Convert back to string and return:
-		return converter.convertArrayToCommaSeparatedString(receivedBuffer);
+		return converter.convertBufferToCommaSeparatedString(receiveBuffer,
+			receiveCount);
 	}
 
 	@Override
 	public String scatter(String sendString, int sendCount, int receiveCount,
 		int root)
 	{
-		double[] sendBuffer;
+		DoubleBuffer sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
+			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
 		}
 		else {
-			sendBuffer = new double[0];
+			sendBuffer = MPI.newDoubleBuffer(0);
 		}
 
-		double[] receiveBuffer = (double[]) scatterArray(sendBuffer, sendCount,
+		DoubleBuffer receiveBuffer = scatterArray(sendBuffer, sendCount,
 			receiveCount, root);
-		return converter.convertArrayToCommaSeparatedString(receiveBuffer);
+		return converter.convertBufferToCommaSeparatedString(receiveBuffer,
+			receiveCount);
 	}
 
-	// Details about macro variables at
-	// https://imagej.nih.gov/ij/developer/macro/macros.html at the variables
-	// section:
-	private Datatype findDatatype(Object sendBuffer) {
-		Datatype buffersDatatype = MPI.DOUBLE;
-		if (sendBuffer.getClass().equals(double[].class)) {
-			buffersDatatype = MPI.DOUBLE;
-		}
-		else if (sendBuffer.getClass().equals(boolean[].class)) {
-			buffersDatatype = MPI.BOOLEAN;
-		}
-		else if (sendBuffer.getClass().equals(char[].class)) {
-			buffersDatatype = MPI.CHAR;
-		}
-		else {
-			logger.warning("Unknown type: " + sendBuffer.getClass()
-				.getCanonicalName());
-		}
-		return buffersDatatype;
-	}
-
-	private Object scatterArray(Object sendBuffer, int sendCount,
+	private DoubleBuffer scatterArray(DoubleBuffer sendBuffer, int sendCount,
 		int receiveCount, int root)
 	{
 		// The receive buffer will be of the same type as the send buffer:
-		Object receiveBuffer = Array.newInstance(sendBuffer.getClass()
-			.getComponentType(), receiveCount);
+		DoubleBuffer receiveBuffer = MPI.newDoubleBuffer(receiveCount);
 
 		try {
-			Datatype sendType = findDatatype(sendBuffer);
+			Datatype sendType = MPI.DOUBLE;
 			Datatype receiveType = sendType;
 
-			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType, receiveBuffer,
-				receiveCount, receiveType, root);
+			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType,
+				receiveBuffer, receiveCount, receiveType, root);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -180,23 +159,22 @@ public class MPIParallelism implements Parallelism {
 		return receiveBuffer;
 	}
 
-	private Object gatherArray(Object sendBuffer, int sendCount, int receiveCount,
-		int root)
+	private DoubleBuffer gatherArray(DoubleBuffer sendBuffer, int sendCount,
+		int receiveCount, int root)
 	{
 		// The receive buffer will be of the same type as the send buffer:
-		Object receiveBuffer = null;
+		DoubleBuffer receiveBuffer = null;
 		// Only the specified node will gather the send items:
 		if (getRank() == root) {
-			receiveBuffer = Array.newInstance(sendBuffer.getClass()
-				.getComponentType(), receiveCount * getSize());
+			receiveBuffer = MPI.newDoubleBuffer(receiveCount * getSize());
 		}
 
 		try {
-			Datatype sendType = findDatatype(sendBuffer);
+			Datatype sendType = MPI.DOUBLE;
 			Datatype receiveType = sendType;
 
-			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType, receiveBuffer,
-				receiveCount, receiveType, root);
+			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType,
+				receiveBuffer, receiveCount, receiveType, root);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -208,17 +186,18 @@ public class MPIParallelism implements Parallelism {
 	public String gather(String sendString, int sendCount, int receiveCount,
 		int root)
 	{
-		double[] sendBuffer;
+		DoubleBuffer sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToArray(sendString);
+			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
 		}
 		else {
-			sendBuffer = new double[0];
+			sendBuffer = MPI.newDoubleBuffer(0);
 		}
 
-		double[] receiveBuffer = (double[]) gatherArray(sendBuffer, sendCount,
+		DoubleBuffer receiveBuffer = gatherArray(sendBuffer, sendCount,
 			receiveCount, root);
-		return converter.convertArrayToCommaSeparatedString(receiveBuffer);
+		return converter.convertBufferToCommaSeparatedString(receiveBuffer,
+			receiveCount);
 	}
 
 	@Override
@@ -226,41 +205,46 @@ public class MPIParallelism implements Parallelism {
 		int receiver)
 	{
 		// Convert comma separated string to array:
-		double[] sendBuffer = converter.convertCommaSeparatedStringToArray(
+		DoubleBuffer sendBuffer = converter.convertCommaSeparatedStringToBuffer(
 			sendString);
 
 		int size = getSize();
-
-		Datatype datatype = findDatatype(sendBuffer);
 
 		int[] receiveCounts = new int[size];
 		int[] displacements = new int[size];
 		int sendCount = 0;
 		int offset = 0;
 		for (int destination = 0; destination < size; destination++) {
-			sendCount = getEqualAmountOfWork(destination, size, totalReceiveBufferLength);
+			sendCount = getEqualAmountOfWork(destination, size,
+				totalReceiveBufferLength);
 			receiveCounts[destination] = sendCount;
 			displacements[destination] = offset;
 			offset += sendCount;
 		}
 
-		double[] receivedBuffer;
+		DoubleBuffer receivedBuffer;
 		if (getRank() == receiver) {
-			receivedBuffer = new double[totalReceiveBufferLength];
-		} else
-		{
-			receivedBuffer = new double[0];
+			receivedBuffer = MPI.newDoubleBuffer(totalReceiveBufferLength);
 		}
+		else {
+			receivedBuffer = MPI.newDoubleBuffer(0);
+		}
+
 		try {
-			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount, datatype, receivedBuffer,
-				receiveCounts, displacements, datatype, receiver);
+			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount,
+				MPI.DOUBLE, receivedBuffer, receiveCounts, displacements, MPI.DOUBLE,
+				receiver);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
 		}
 
 		// Convert back to string and return:
-		return converter.convertArrayToCommaSeparatedString(receivedBuffer);
+		if (getRank() == receiver) {
+			return converter.convertBufferToCommaSeparatedString(receivedBuffer,
+				totalReceiveBufferLength);
+		}
+		return "";
 	}
 
 	private int getEqualAmountOfWork(int myRank, int size, int totalSizeOfWork) {
