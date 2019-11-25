@@ -19,7 +19,7 @@ public class Finalise implements MyMacroExtensionDescriptor {
 
 	@Override
 	public String description() {
-		return "Ïnitialize parallelism.";
+		return "Finalize parallelism.";
 	}
 
 	@Override
