@@ -3,6 +3,8 @@ package cz.it4i.fiji.parallel_macro.functions;
 
 import cz.it4i.fiji.parallel_macro.MPIParallelism;
 import cz.it4i.fiji.parallel_macro.Parallelism;
+import mpi.MPI;
+import mpi.MPIException;
 
 public class Initialise implements MyMacroExtensionDescriptor {
 
@@ -10,6 +12,12 @@ public class Initialise implements MyMacroExtensionDescriptor {
 	public void runFromMacro(Object[] parameters) {
 		Parallelism parallelism = MPIParallelism.getMPIParallelism();
 		parallelism.initialise();
+		
+		try {
+			System.out.println("MPI initialized with size: "+MPI.COMM_WORLD.getSize());
+		} catch (MPIException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
