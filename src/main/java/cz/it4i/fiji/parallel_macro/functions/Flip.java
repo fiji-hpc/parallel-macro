@@ -50,7 +50,7 @@ public class Flip implements MyMacroExtensionDescriptor {
 			int width = imageInputOutput.getWidth();
 			int height = imageInputOutput.getHeight();
 
-			IntBuffer imagePixels2 = MPI.newIntBuffer(width * height);
+			IntBuffer newImagePixels = MPI.newIntBuffer(width * height);
 			System.out.println("Rank " + rank + ". Done reading image!");
 
 			if (flipY || flipX) {
@@ -71,7 +71,7 @@ public class Flip implements MyMacroExtensionDescriptor {
 				}
 
 				// Create smaller local array of the image:
-				IntBuffer yFlippedPixels = MPI.newIntBuffer(width * heightParts[rank]);
+				IntBuffer flippedPixels = MPI.newIntBuffer(width * heightParts[rank]);
 
 				// Each node should flip its image part:
 				for (int x = 0; x < width; x++) {
@@ -79,9 +79,10 @@ public class Flip implements MyMacroExtensionDescriptor {
 						displacementHeightParts[rank]; y < (displacementHeightParts[rank] +
 							heightParts[rank]); y++)
 					{
-						setValueAt(yFlippedPixels, width, x, (y -
-							displacementHeightParts[rank]), getValueAt(imagePixels, width,
-								(flipX) ? (width - 1 - x) : x, flipY ? (height - 1) - y : y));
+						imageInputOutput.setValueAt(flippedPixels, width, x, (y -
+							displacementHeightParts[rank]), imageInputOutput.getValueAt(
+								imagePixels, width, (flipX) ? (width - 1 - x) : x, flipY
+									? (height - 1) - y : y));
 					}
 				}
 
@@ -91,33 +92,24 @@ public class Flip implements MyMacroExtensionDescriptor {
 					" 1D displacement " + displacements[rank]);
 
 				// Gather image parts from all nodes together:
-				MPI.COMM_WORLD.gatherv(yFlippedPixels, heightParts[rank] * width,
-					MPI.INT, imagePixels2, counts, displacements, MPI.INT, 0);
+				MPI.COMM_WORLD.gatherv(flippedPixels, heightParts[rank] * width,
+					MPI.INT, newImagePixels, counts, displacements, MPI.INT, 0);
 				System.out.println("Gathered! " + rank);
 			}
 			else {
-				imagePixels2 = imagePixels;
+				newImagePixels = imagePixels;
 			}
 
 			MPI.COMM_WORLD.barrier();
 			// Write the selected image:
 			if (rank == 0) {
-				imageInputOutput.writeImage(result, copyIntBufferToArray(imagePixels2,
-					width * height));
+				imageInputOutput.writeImage(result, newImagePixels);
 				System.out.println("Done writing image!");
 			}
 		}
 		catch (MPIException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private static int[] copyIntBufferToArray(IntBuffer buffer, int bufferSize) {
-		int[] array = new int[bufferSize];
-		for (int i = 0; i < bufferSize; i++) {
-			array[i] = buffer.get(i);
-		}
-		return array;
 	}
 
 	// Do not remove this version. Keep this serial version for testing.
@@ -135,44 +127,22 @@ public class Flip implements MyMacroExtensionDescriptor {
 		int width = imageInputOutput.getWidth();
 		int height = imageInputOutput.getHeight();
 
-		if (flipX) {
-			IntBuffer xFlippedPixels = MPI.newIntBuffer(width * height);
+		if (flipX || flipY) {
+			IntBuffer flippedPixels = MPI.newIntBuffer(width * height);
 
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					setValueAt(xFlippedPixels, width, x, y, getValueAt(imagePixels, width,
-						(width - 1) - x, y));
+					imageInputOutput.setValueAt(flippedPixels, width, x, y,
+						imageInputOutput.getValueAt(imagePixels, width, (flipX) ? ((width -
+							1) - x) : x, (flipX) ? y : ((height - 1) - y)));
 				}
 			}
-			imagePixels = xFlippedPixels;
-		}
-
-		if (flipY) {
-			IntBuffer yFlippedPixels = MPI.newIntBuffer(width * height);
-
-			for (int x = 0; x < width; x++) {
-				for (int y = 0; y < height; y++) {
-					setValueAt(yFlippedPixels, width, x, y, getValueAt(imagePixels, width,
-						x, (height - 1) - y));
-				}
-			}
-			imagePixels = yFlippedPixels;
+			imagePixels = flippedPixels;
 		}
 
 		// Write the selected image:
-		imageInputOutput.writeImage(result, copyIntBufferToArray(imagePixels,
-			width * height));
+		imageInputOutput.writeImage(result, imagePixels);
 		System.out.println("Done writing image!");
-	}
-
-	private static void setValueAt(IntBuffer pixels, int width, int x, int y,
-		int value)
-	{
-		pixels.put(x + y * width, value);
-	}
-
-	private static int getValueAt(IntBuffer pixels, int width, int x, int y) {
-		return pixels.get(x + y * width);
 	}
 
 	@Override
@@ -188,7 +158,6 @@ public class Flip implements MyMacroExtensionDescriptor {
 
 	@Override
 	public String parameters() {
-		return "input, result, flipX, flipY";
+		return "input image path, result image path, flipX, flipY";
 	}
-
 }
