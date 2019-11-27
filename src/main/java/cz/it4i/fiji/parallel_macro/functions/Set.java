@@ -70,7 +70,10 @@ public class Set implements MyMacroExtensionDescriptor {
 			System.out.println("Gathered! " + rank);
 
 			// Save the result image:
-			imageInputOutput.writeImage(result, newImage);
+			if(rank == 0) {
+				imageInputOutput.writeImage(result, newImage);
+				System.out.println("Done writing image!");
+			}
 
 		}
 		catch (MPIException exc) {
