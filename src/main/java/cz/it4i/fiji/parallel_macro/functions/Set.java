@@ -33,6 +33,12 @@ public class Set implements MyMacroExtensionDescriptor {
 
 	private void parallelSet(String input, String result, int value) {
 		try {
+			Kernel setKernel = (ImageInputOutput imageInputOutput,
+				IntBuffer newImagePart, int width, int x, int y, Object aValue,
+				int rank, Map<String, int[]> workload) -> imageInputOutput.setValueAt(
+					newImagePart, width, x, (y - workload.get(
+						"displacementHeightParts")[rank]), new Color(value, value, value));
+
 			int size = MPI.COMM_WORLD.getSize();
 			int rank = MPI.COMM_WORLD.getRank();
 
@@ -55,8 +61,8 @@ public class Set implements MyMacroExtensionDescriptor {
 						"displacementHeightParts")[rank] + workload.get(
 							"heightParts")[rank]); y++)
 				{
-					imageInputOutput.setValueAt(newImagePart, width, x, (y - workload.get(
-						"displacementHeightParts")[rank]), new Color(value, value, value));
+					setKernel.compute(imageInputOutput, newImagePart, width, x, y, value,
+						rank, workload);
 				}
 			}
 
@@ -70,7 +76,7 @@ public class Set implements MyMacroExtensionDescriptor {
 			System.out.println("Gathered! " + rank);
 
 			// Save the result image:
-			if(rank == 0) {
+			if (rank == 0) {
 				imageInputOutput.writeImage(result, newImage);
 				System.out.println("Done writing image!");
 			}
