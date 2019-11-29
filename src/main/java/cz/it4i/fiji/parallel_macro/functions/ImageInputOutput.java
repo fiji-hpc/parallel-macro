@@ -53,10 +53,6 @@ public class ImageInputOutput {
 	}
 
 	public void writeImage(String result, IntBuffer buffer) {
-		// Copy buffer to array:
-		int[] imagePixels = copyIntBufferToArray(buffer, this.imageWidth *
-			this.imageHeight);
-
 		// Create an image buffer of the same size and type as the original image:
 		BufferedImage imageReader = new BufferedImage(this.imageWidth,
 			this.imageHeight, this.imageType);
@@ -64,7 +60,7 @@ public class ImageInputOutput {
 		// Write all the pixel values to the buffer one by one:
 		for (int x = 0; x < this.imageWidth; x++) {
 			for (int y = 0; y < this.imageHeight; y++) {
-				imageReader.setRGB(x, y, imagePixels[x + y * this.imageWidth]);
+				imageReader.setRGB(x, y, buffer.get(x + y * this.imageWidth));
 			}
 		}
 
@@ -76,14 +72,6 @@ public class ImageInputOutput {
 			System.out.println("Error writting image.");
 			exc.printStackTrace();
 		}
-	}
-
-	private int[] copyIntBufferToArray(IntBuffer buffer, int bufferSize) {
-		int[] array = new int[bufferSize];
-		for (int i = 0; i < bufferSize; i++) {
-			array[i] = buffer.get(i);
-		}
-		return array;
 	}
 	
 	public void setValueAt(IntBuffer pixels, int width, int x, int y, Color color) {
