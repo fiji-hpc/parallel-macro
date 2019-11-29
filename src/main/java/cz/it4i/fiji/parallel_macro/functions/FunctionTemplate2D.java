@@ -10,7 +10,7 @@ import mpi.MPIException;
 
 public class FunctionTemplate2D {
 
-	public void runTemplateWithKernel(String input, String result, Kernel kernel,
+	public void runWithKernel(String input, String result, Kernel kernel,
 		List<Object> parameters)
 	{
 		try {
@@ -19,7 +19,7 @@ public class FunctionTemplate2D {
 
 			// Load the input image:
 			ImageInputOutput imageInputOutput = new ImageInputOutput();
-			imageInputOutput.readImage(input);
+			IntBuffer imagePixels = imageInputOutput.readImage(input);
 			int height = imageInputOutput.getHeight();
 			int width = imageInputOutput.getWidth();
 
@@ -36,8 +36,8 @@ public class FunctionTemplate2D {
 						"displacementHeightParts")[rank] + workload.get(
 							"heightParts")[rank]); y++)
 				{
-					kernel.compute(imageInputOutput, newImagePart, width, x, y, parameters,
-						rank, workload);
+					kernel.compute(imageInputOutput, newImagePart, width, x, y,
+						parameters, imagePixels, rank, workload);
 				}
 			}
 

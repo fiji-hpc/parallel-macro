@@ -37,7 +37,7 @@ public class Set implements MyMacroExtensionDescriptor {
 		List<Object> parameters = new ArrayList<>();
 		parameters.add(value);
 
-		template.runTemplateWithKernel(input, result, Kernels.set, parameters);
+		template.runWithKernel(input, result, Kernels.set, parameters);
 	}
 
 	private void serialSet(String input, String result, int value) {
