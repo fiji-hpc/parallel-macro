@@ -39,11 +39,7 @@ public class ImageInputOutput {
 			// Load the image in an 1D array:
 			imagePixels = MPI.newIntBuffer(this.imageWidth * this.imageHeight);
 
-			for (int x = 0; x < this.imageWidth; x++) {
-				for (int y = 0; y < this.imageHeight; y++) {
-					imagePixels.put(x + y * this.imageWidth, bufferedImage.getRGB(x, y));
-				}
-			}
+			bufferedImageToIntBuffer(bufferedImage, imagePixels);
 		}
 		catch (IOException exc) {
 			System.out.println("Error reading image.");
@@ -57,12 +53,8 @@ public class ImageInputOutput {
 		BufferedImage imageReader = new BufferedImage(this.imageWidth,
 			this.imageHeight, this.imageType);
 
-		// Write all the pixel values to the buffer one by one:
-		for (int x = 0; x < this.imageWidth; x++) {
-			for (int y = 0; y < this.imageHeight; y++) {
-				imageReader.setRGB(x, y, buffer.get(x + y * this.imageWidth));
-			}
-		}
+		// Write all the pixel values to the buffer:
+		intBufferToBufferedImage(buffer, imageReader);
 
 		// Write the image to disk:
 		try {
@@ -73,8 +65,10 @@ public class ImageInputOutput {
 			exc.printStackTrace();
 		}
 	}
-	
-	public void setValueAt(IntBuffer pixels, int width, int x, int y, Color color) {
+
+	public void setValueAt(IntBuffer pixels, int width, int x, int y,
+		Color color)
+	{
 		setValueAt(pixels, width, x, y, color.getRGB());
 	}
 
@@ -113,5 +107,25 @@ public class ImageInputOutput {
 		splitWorkload.put("counts", counts);
 		splitWorkload.put("displacements", displacements);
 		return splitWorkload;
+	}
+
+	public void intBufferToBufferedImage(IntBuffer intBuffer,
+		BufferedImage bufferedImage)
+	{
+		int[] tempArray = new int[intBuffer.capacity()];
+		intBuffer.rewind();
+		intBuffer.get(tempArray);
+		bufferedImage.setRGB(0, 0, bufferedImage.getWidth(), bufferedImage
+			.getHeight(), tempArray, 0, bufferedImage.getWidth());
+	}
+
+	public void bufferedImageToIntBuffer(BufferedImage bufferedImage,
+		IntBuffer intBuffer)
+	{
+		int[] tempArray = new int[intBuffer.capacity()];
+		bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage
+			.getHeight(), tempArray, 0, bufferedImage.getWidth());
+		intBuffer.rewind();
+		intBuffer.put(tempArray);
 	}
 }
