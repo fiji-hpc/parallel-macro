@@ -13,10 +13,12 @@ public class Set implements MyMacroExtensionDescriptor {
 		// Call the actual function:
 		try {
 			if (MPI.COMM_WORLD.getSize() > 1) {
-				template.runWith2DKernelParallel(Kernels.setParallel, parameters);
+				template.runWith2DKernelParallel(Kernels.setParallel,
+					EarlyEscapeConditions.set, parameters);
 			}
 			else {
-				template.runWith2DKernelSerial(Kernels.setSerial, parameters);
+				template.runWith2DKernelSerial(Kernels.setSerial,
+					EarlyEscapeConditions.set, parameters);
 			}
 		}
 		catch (MPIException e) {

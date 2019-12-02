@@ -10,7 +10,8 @@ public class AddImageAndScalar implements MyMacroExtensionDescriptor {
 		FunctionTemplates template = new FunctionTemplates();
 
 		// Call the actual function:
-		template.runWith2DKernelParallel(Kernels.addImageAndScalarParallel, parameters);
+		template.runWith2DKernelParallel(Kernels.addImageAndScalarParallel,
+			EarlyEscapeConditions.addImageAndScalar, parameters);
 	}
 
 	@Override

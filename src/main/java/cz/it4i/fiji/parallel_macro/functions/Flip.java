@@ -13,11 +13,13 @@ public class Flip implements MyMacroExtensionDescriptor {
 		FunctionTemplates template = new FunctionTemplates();
 		// Call the actual function:
 		try {
-			if (MPI.COMM_WORLD.getSize() > 1) {				
-				template.runWith2DKernelParallel(Kernels.flipParallel, parameters);
+			if (MPI.COMM_WORLD.getSize() > 1) {
+				template.runWith2DKernelParallel(Kernels.flipParallel,
+					EarlyEscapeConditions.flip, parameters);
 			}
 			else {
-				template.runWith2DKernelSerial(Kernels.flipSerial, parameters);
+				template.runWith2DKernelSerial(Kernels.flipSerial,
+					EarlyEscapeConditions.flip, parameters);
 			}
 		}
 		catch (MPIException e) {
