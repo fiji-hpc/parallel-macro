@@ -62,14 +62,19 @@ public class Kernels {
 
 		int red = new Color(imageInputOutput.getValueAt(pixelsBuffer, width, x, y))
 			.getRed() + value;
+		if (red > 255) red = 255;
+		else if (red < 0) red = 0;
 		int green = new Color(imageInputOutput.getValueAt(pixelsBuffer, width, x,
 			y)).getGreen() + value;
+		if (green > 255) green = 255;
+		else if (green < 0) green = 0;
 		int blue = new Color(imageInputOutput.getValueAt(pixelsBuffer, width, x, y))
 			.getBlue() + value;
+		if (blue > 255) blue = 255;
+		else if (blue < 0) blue = 0;
 
 		imageInputOutput.setValueAt(newImagePart, width, x, (y - workload.get(
-			"displacementHeightParts")[rank]), new Color((red < 255) ? red : 255,
-				(green < 255) ? green : 255, (blue < 255) ? blue : 255));
+			"displacementHeightParts")[rank]), new Color(red, green, blue));
 	};
 
 	public static final SerialKernel setSerial = (
