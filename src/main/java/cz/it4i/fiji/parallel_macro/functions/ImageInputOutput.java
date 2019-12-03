@@ -11,9 +11,14 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import mpi.MPI;
 
 public class ImageInputOutput {
+
+	private final Logger logger = LoggerFactory.getLogger(ImageInputOutput.class);
 
 	private int imageWidth = 0;
 	private int imageHeight = 0;
@@ -42,8 +47,7 @@ public class ImageInputOutput {
 			bufferedImageToIntBuffer(bufferedImage, imagePixels);
 		}
 		catch (IOException exc) {
-			System.out.println("Error reading image.");
-			exc.printStackTrace();
+			logger.error("Error reading image. {}", exc.getMessage());
 		}
 		return imagePixels;
 	}
@@ -61,8 +65,7 @@ public class ImageInputOutput {
 			ImageIO.write(imageReader, "jpg", new File(result));
 		}
 		catch (IOException exc) {
-			System.out.println("Error writting image.");
-			exc.printStackTrace();
+			logger.error("Error writting image. {}", exc.getMessage());
 		}
 	}
 

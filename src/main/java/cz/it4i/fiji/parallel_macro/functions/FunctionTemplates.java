@@ -3,6 +3,8 @@ package cz.it4i.fiji.parallel_macro.functions;
 
 import java.nio.IntBuffer;
 import java.util.Map;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import cz.it4i.fiji.parallel_macro.functions.EarlyEscapeConditions.EarlyEscapeCondition;
 import cz.it4i.fiji.parallel_macro.functions.Kernels.ParallelKernel;
@@ -12,10 +14,15 @@ import mpi.MPIException;
 
 public class FunctionTemplates {
 
+	private final Logger logger = LoggerFactory.getLogger(
+		FunctionTemplates.class);
+
 	public void runWith2DKernelParallel(ParallelKernel kernel,
 		EarlyEscapeCondition condition, Object[] parameters)
 	{
 		try {
+			// The first two parameters should always be the input image and the
+			// result image:
 			String input = (String) parameters[0];
 			String result = (String) parameters[1];
 
@@ -58,17 +65,17 @@ public class FunctionTemplates {
 					imageBuffer = newImageBuffer;
 				}
 			}
-			System.out.println("Gathered! " + rank);
+			logger.debug("Rank {} gathered.", rank);
 
 			// Save the result image:
 			if (rank == 0) {
 				imageInputOutput.writeImage(result, imageBuffer);
-				System.out.println("Done writing image!");
+				logger.info("Done writing image!");
 			}
 
 		}
 		catch (MPIException exc) {
-			exc.printStackTrace();
+			logger.error(exc.getMessage());
 		}
 	}
 

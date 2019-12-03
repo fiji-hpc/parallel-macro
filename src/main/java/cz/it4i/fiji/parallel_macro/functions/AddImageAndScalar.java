@@ -2,16 +2,28 @@
 package cz.it4i.fiji.parallel_macro.functions;
 
 import ij.macro.MacroExtension;
+import mpi.MPI;
+import mpi.MPIException;
 
 public class AddImageAndScalar implements MyMacroExtensionDescriptor {
 
 	@Override
 	public void runFromMacro(Object[] parameters) {
 		FunctionTemplates template = new FunctionTemplates();
-
-		// Call the actual function:
-		template.runWith2DKernelParallel(Kernels.addImageAndScalarParallel,
-			EarlyEscapeConditions.addImageAndScalar, parameters);
+		try {
+			// Call the actual function:
+			if (MPI.COMM_WORLD.getRank() > 1) {
+				template.runWith2DKernelParallel(Kernels.addImageAndScalarParallel,
+					EarlyEscapeConditions.addImageAndScalar, parameters);
+			}
+			else {
+				template.runWith2DKernelSerial(Kernels.addImageAndScalarSerial,
+					EarlyEscapeConditions.addImageAndScalar, parameters);
+			}
+		}
+		catch (MPIException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

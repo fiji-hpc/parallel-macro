@@ -76,6 +76,28 @@ public class Kernels {
 		imageInputOutput.setValueAt(newImagePart, width, x, (y - workload.get(
 			"displacementHeightParts")[rank]), new Color(red, green, blue));
 	};
+	
+	public static final SerialKernel addImageAndScalarSerial = (
+			ImageInputOutput imageInputOutput, int width, int height, int x, int y,
+			Object[] parameters, IntBuffer oldImageBuffer,
+			IntBuffer newImageBuffer) -> {
+				int value = (int) ((double) parameters[2]);
+
+				int red = new Color(imageInputOutput.getValueAt(oldImageBuffer, width, x, y))
+					.getRed() + value;
+				if (red > 255) red = 255;
+				else if (red < 0) red = 0;
+				int green = new Color(imageInputOutput.getValueAt(oldImageBuffer, width, x,
+					y)).getGreen() + value;
+				if (green > 255) green = 255;
+				else if (green < 0) green = 0;
+				int blue = new Color(imageInputOutput.getValueAt(oldImageBuffer, width, x, y))
+					.getBlue() + value;
+				if (blue > 255) blue = 255;
+				else if (blue < 0) blue = 0;
+
+				imageInputOutput.setValueAt(newImageBuffer, width, x, y, new Color(red, green, blue));
+		};
 
 	public static final SerialKernel setSerial = (
 		ImageInputOutput imageInputOutput, int width, int height, int x, int y,
