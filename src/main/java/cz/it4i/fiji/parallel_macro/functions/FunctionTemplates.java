@@ -2,7 +2,6 @@
 package cz.it4i.fiji.parallel_macro.functions;
 
 import java.nio.IntBuffer;
-import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -31,45 +30,45 @@ public class FunctionTemplates {
 
 			// Load the input image:
 			ImageInputOutput imageInputOutput = new ImageInputOutput();
-			IntBuffer imageBuffer = imageInputOutput.readImage(input);
-			int height = imageInputOutput.getHeight();
-			int width = imageInputOutput.getWidth();
+			IntBufferImage image = imageInputOutput.readImage(input);
+			int height = image.getHeight();
+			int width = image.getWidth();
 
 			if (!condition.escape(parameters)) {
 				// Split the workload:
-				Map<String, int[]> workload = imageInputOutput.splitWorkLoad(size);
+				Workload workload = new Workload(image, size);
 
-				IntBuffer newImagePart = MPI.newIntBuffer(workload.get(
-					"heightParts")[rank] * width);
+				IntBuffer newImagePart = MPI.newIntBuffer(workload
+					.getHeightParts()[rank] * width);
 
 				// Process the image:
 				for (int x = 0; x < width; x++) {
-					for (int y = workload.get(
-						"displacementHeightParts")[rank]; y < (workload.get(
-							"displacementHeightParts")[rank] + workload.get(
-								"heightParts")[rank]); y++)
+					for (int y = workload
+						.getDisplacementHeightParts()[rank]; y < (workload
+							.getDisplacementHeightParts()[rank] + workload
+								.getHeightParts()[rank]); y++)
 					{
-						kernel.compute(imageInputOutput, newImagePart, x, y,
-							parameters, imageBuffer, rank, workload);
+						kernel.compute(newImagePart, x, y, parameters, image, rank,
+							workload);
 					}
 				}
 
 				// Gather the image:
 				IntBuffer newImageBuffer = MPI.newIntBuffer(width * height);
 				// Gather image parts from all nodes together:
-				MPI.COMM_WORLD.gatherv(newImagePart, workload.get("heightParts")[rank] *
-					width, MPI.INT, newImageBuffer, workload.get("counts"), workload.get(
-						"displacements"), MPI.INT, 0);
+				MPI.COMM_WORLD.gatherv(newImagePart, workload.getHeightParts()[rank] *
+					width, MPI.INT, newImageBuffer, workload.getCounts(), workload
+						.getDisplacements(), MPI.INT, 0);
 
 				if (rank == 0) {
-					imageBuffer = newImageBuffer;
+					image.setIntBuffer(newImageBuffer);
 				}
 			}
 			logger.debug("Rank {} gathered.", rank);
 
 			// Save the result image:
 			if (rank == 0) {
-				imageInputOutput.writeImage(result, imageBuffer);
+				imageInputOutput.writeImage(result, image);
 				logger.info("Done writing image!");
 			}
 
@@ -87,10 +86,10 @@ public class FunctionTemplates {
 
 		// Read input image:
 		ImageInputOutput imageInputOutput = new ImageInputOutput();
-		IntBuffer imageBuffer = imageInputOutput.readImage(input);
+		IntBufferImage imageBuffer = imageInputOutput.readImage(input);
 
-		int width = imageInputOutput.getWidth();
-		int height = imageInputOutput.getHeight();
+		int width = imageBuffer.getWidth();
+		int height = imageBuffer.getHeight();
 
 		if (!condition.escape(parameters)) {
 			IntBuffer newImageBuffer = MPI.newIntBuffer(width * height);
@@ -98,15 +97,13 @@ public class FunctionTemplates {
 			// Process the image:
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					kernel.compute(imageInputOutput, x, y, parameters,
-						imageBuffer, newImageBuffer);
+					kernel.compute(x, y, parameters, imageBuffer, newImageBuffer);
 				}
 			}
-			imageBuffer = newImageBuffer;
+			imageBuffer.setIntBuffer(newImageBuffer);
 		}
 
 		// Write output image:
 		imageInputOutput.writeImage(result, imageBuffer);
 	}
-
 }
