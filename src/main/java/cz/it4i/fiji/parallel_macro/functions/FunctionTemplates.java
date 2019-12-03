@@ -49,7 +49,7 @@ public class FunctionTemplates {
 							"displacementHeightParts")[rank] + workload.get(
 								"heightParts")[rank]); y++)
 					{
-						kernel.compute(imageInputOutput, newImagePart, width, height, x, y,
+						kernel.compute(imageInputOutput, newImagePart, x, y,
 							parameters, imageBuffer, rank, workload);
 					}
 				}
@@ -98,7 +98,7 @@ public class FunctionTemplates {
 			// Process the image:
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
-					kernel.compute(imageInputOutput, width, height, x, y, parameters,
+					kernel.compute(imageInputOutput, x, y, parameters,
 						imageBuffer, newImageBuffer);
 				}
 			}

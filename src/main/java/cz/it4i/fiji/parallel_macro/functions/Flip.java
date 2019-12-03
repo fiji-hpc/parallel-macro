@@ -1,11 +1,16 @@
 
 package cz.it4i.fiji.parallel_macro.functions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ij.macro.MacroExtension;
 import mpi.MPI;
 import mpi.MPIException;
 
 public class Flip implements MyMacroExtensionDescriptor {
+
+	private final Logger logger = LoggerFactory.getLogger(Flip.class);
 
 	@Override
 	public void runFromMacro(Object[] parameters) {
@@ -23,7 +28,7 @@ public class Flip implements MyMacroExtensionDescriptor {
 			}
 		}
 		catch (MPIException e) {
-			e.printStackTrace();
+			logger.error("An exception occurred!", e);
 		}
 	}
 

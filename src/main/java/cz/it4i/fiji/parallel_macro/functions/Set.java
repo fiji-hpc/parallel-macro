@@ -1,12 +1,17 @@
 
 package cz.it4i.fiji.parallel_macro.functions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ij.macro.MacroExtension;
 import mpi.MPI;
 import mpi.MPIException;
 
 public class Set implements MyMacroExtensionDescriptor {
 
+	private final Logger logger = LoggerFactory.getLogger(Set.class);
+	
 	@Override
 	public void runFromMacro(Object[] parameters) {
 		FunctionTemplates template = new FunctionTemplates();
@@ -21,8 +26,8 @@ public class Set implements MyMacroExtensionDescriptor {
 					EarlyEscapeConditions.set, parameters);
 			}
 		}
-		catch (MPIException e) {
-			e.printStackTrace();
+		catch (MPIException exc) {
+			logger.error("An exception occurred!", exc);
 		}
 	}
 
