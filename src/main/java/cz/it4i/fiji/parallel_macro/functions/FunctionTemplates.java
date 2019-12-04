@@ -66,12 +66,10 @@ public class FunctionTemplates {
 					image.setIntBuffer(newImageBuffer);
 				}
 			}
-			logger.debug("Rank {} gathered.", rank);
 
 			// Save the result image:
 			if (rank == 0) {
 				imageInputOutput.writeImage(result, image);
-				logger.info("Done writing image!");
 			}
 
 		}
@@ -139,12 +137,10 @@ public class FunctionTemplates {
 					image1.setIntBuffer(newImageBuffer);
 				}
 			}
-			logger.debug("Rank {} gathered.", rank);
 
 			// Save the result image:
 			if (rank == 0) {
 				imageInputOutput.writeImage(result, image1);
-				logger.info("Done writing image!");
 			}
 
 		}
