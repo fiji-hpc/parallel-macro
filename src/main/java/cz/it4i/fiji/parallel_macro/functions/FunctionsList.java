@@ -10,7 +10,7 @@ public class FunctionsList {
 	// list of all available functions
 	private static MyMacroExtensionDescriptor[] list = { new Initialise(),
 		new ReportText(), new Finalise(), new Flip(), new Set(),
-		new AddImageAndScalar(), new Equal() };
+		new AddImageAndScalar(), new Equal(), new Benchmark() };
 
 	public static MyMacroExtensionDescriptor[] getList() {
 		return list;
