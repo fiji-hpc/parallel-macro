@@ -10,7 +10,7 @@ public class EarlyEscapeConditions {
 
 	public static final EarlyEscapeCondition flip = (Object[] parameters) -> {
 		boolean flipX = (((double) parameters[2]) == 1.0);
-		boolean flipY = (((double) parameters[2]) == 1.0);
+		boolean flipY = (((double) parameters[3]) == 1.0);
 		return (!flipX && !flipY);
 	};
 
@@ -24,5 +24,9 @@ public class EarlyEscapeConditions {
 		// If the value to be added is zero the image will be the same. No need to
 		// loop through the entire image.
 		return value == 0;
+	};
+
+	public static final EarlyEscapeCondition equal = (Object[] parameters) -> {
+		return false;
 	};
 }
