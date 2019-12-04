@@ -6,6 +6,8 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ij.IJ;
+import ij.ImagePlus;
 import ij.macro.MacroExtension;
 import mpi.MPI;
 import mpi.MPIException;
@@ -22,10 +24,10 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 	private void runBenchmark(Object[] parameters) {
 		try {
 			int size = MPI.COMM_WORLD.getSize();
-			if (size < 2) {
-				logger.error("The benchmark requires more than one node to run.");
-			}
-			else {
+//			if (size < 2) {
+//				logger.error("The benchmark requires more than one node to run.");
+//			}
+//			else {
 				final int NUMBER_OF_TRIALS = 100;
 				int rank = MPI.COMM_WORLD.getRank();
 
@@ -34,13 +36,17 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 				double[] samples = new double[NUMBER_OF_TRIALS];
 
 				// Benchmark flip:
+				String input = (String) parameters[0];
+				String result = (String) parameters[2]; 
+				
 				Flip flip = new Flip();
 				Object[] flipParameters = new Object[4];
-				flipParameters[0] = parameters[0]; // Input image path.
-				flipParameters[1] = parameters[2]; // Result image path.
+				flipParameters[0] = input; // Input image path.
+				flipParameters[1] = result; // Result image path.
 				flipParameters[2] = 1.0; // FlipX is true.
 				flipParameters[3] = 1.0; // FlipY is true.
 
+				// Run the parallel flip a number of times:
 				for (int i = 0; i < NUMBER_OF_TRIALS; i++) {
 					startTime = MPI.wtime();
 					flip.runFromMacro(flipParameters);
@@ -48,21 +54,35 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 					samples[i] = endTime - startTime;
 				}
 
-				MPI.COMM_WORLD.barrier();
-
+				// Calculate the median time:
 				if (rank == 0) {
-					System.out.println("Parallel flip, nodes: " + size + " median time: " +
-						calculateMedian(samples));
+					System.out.println("Parallel flip, nodes: " + size +
+						" median time: " + median(samples));
 				}
 
-			}
+				MPI.COMM_WORLD.barrier();
+
+				ImagePlus imp = new ImagePlus(input);
+				if (rank == 0) {
+					for (int i = 0; i < NUMBER_OF_TRIALS; i++) {
+						startTime = MPI.wtime();
+						IJ.run(imp, "Flip Horizontally", "");
+						IJ.run(imp, "Flip Vertically", "");
+						IJ.save(imp, result);
+						endTime = MPI.wtime();
+						samples[i] = endTime - startTime;
+					}
+					System.out.println("Fiji serial flip, median time: " + median(
+						samples));
+				}
+//			}
 		}
 		catch (MPIException exc) {
 			logger.error("An exception occured.", exc);
 		}
 	}
 
-	private double calculateMedian(double[] samples) {
+	private double median(double[] samples) {
 		Arrays.sort(samples);
 		if (samples.length % 2 == 0) {
 			return (samples[samples.length / 2] + samples[samples.length / 2 - 1]) /
