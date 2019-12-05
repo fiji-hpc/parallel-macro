@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.macro.MacroExtension;
 import mpi.MPI;
 import mpi.MPIException;
@@ -24,10 +23,6 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 	private void runBenchmark(Object[] parameters) {
 		try {
 			int size = MPI.COMM_WORLD.getSize();
-//			if (size < 2) {
-//				logger.error("The benchmark requires more than one node to run.");
-//			}
-//			else {
 				final int NUMBER_OF_TRIALS = 100;
 				int rank = MPI.COMM_WORLD.getRank();
 
@@ -62,20 +57,19 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 
 				MPI.COMM_WORLD.barrier();
 
-				ImagePlus imp = new ImagePlus(input);
 				if (rank == 0) {
 					for (int i = 0; i < NUMBER_OF_TRIALS; i++) {
 						startTime = MPI.wtime();
-						IJ.run(imp, "Flip Horizontally", "");
-						IJ.run(imp, "Flip Vertically", "");
-						IJ.save(imp, result);
+						IJ.open(input);
+						IJ.run("Flip Horizontally", "");
+						IJ.run("Flip Vertically", "");
+						IJ.save(result);
 						endTime = MPI.wtime();
 						samples[i] = endTime - startTime;
 					}
 					System.out.println("Fiji serial flip, median time: " + median(
 						samples));
 				}
-//			}
 		}
 		catch (MPIException exc) {
 			logger.error("An exception occured.", exc);
