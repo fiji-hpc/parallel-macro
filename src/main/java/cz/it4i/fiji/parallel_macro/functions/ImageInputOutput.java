@@ -29,10 +29,10 @@ public class ImageInputOutput {
 			// Load the image in an 1D array:
 			IntBuffer imagePixels = MPI.newIntBuffer(imageWidth * imageHeight);
 
+			bufferedImageToIntBuffer(bufferedImage, imagePixels);
+			
 			newImage = new IntBufferImage(imageWidth, imageHeight, imageType,
 				imagePixels);
-
-			bufferedImageToIntBuffer(bufferedImage, imagePixels);
 		}
 		catch (IOException exc) {
 			logger.error("Error reading image. {}", exc.getMessage());

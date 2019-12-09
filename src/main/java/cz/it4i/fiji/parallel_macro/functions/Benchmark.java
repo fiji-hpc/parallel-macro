@@ -23,7 +23,7 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 	private void runBenchmark(Object[] parameters) {
 		try {
 			int size = MPI.COMM_WORLD.getSize();
-				final int NUMBER_OF_TRIALS = 100;
+				final int NUMBER_OF_TRIALS = 10;
 				int rank = MPI.COMM_WORLD.getRank();
 
 				double startTime;
@@ -32,19 +32,19 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 
 				// Benchmark flip:
 				String input = (String) parameters[0];
-				String result = (String) parameters[2]; 
+				String result = (String) parameters[1]; 
+				double value = 100;
 				
-				Flip flip = new Flip();
-				Object[] flipParameters = new Object[4];
-				flipParameters[0] = input; // Input image path.
-				flipParameters[1] = result; // Result image path.
-				flipParameters[2] = 1.0; // FlipX is true.
-				flipParameters[3] = 1.0; // FlipY is true.
+				Set set = new Set();
+				Object[] setParameters = new Object[3];
+				setParameters[0] = input; // Input image path.
+				setParameters[1] = result; // Result image path.
+				setParameters[2] = value; // The new value for all pixels.
 
 				// Run the parallel flip a number of times:
 				for (int i = 0; i < NUMBER_OF_TRIALS; i++) {
 					startTime = MPI.wtime();
-					flip.runFromMacro(flipParameters);
+					set.runFromMacro(setParameters);
 					endTime = MPI.wtime();
 					samples[i] = endTime - startTime;
 				}
@@ -61,8 +61,7 @@ public class Benchmark implements MyMacroExtensionDescriptor {
 					for (int i = 0; i < NUMBER_OF_TRIALS; i++) {
 						startTime = MPI.wtime();
 						IJ.open(input);
-						IJ.run("Flip Horizontally", "");
-						IJ.run("Flip Vertically", "");
+						IJ.run("Set...", "value="+value);
 						IJ.save(result);
 						endTime = MPI.wtime();
 						samples[i] = endTime - startTime;
