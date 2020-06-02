@@ -36,6 +36,10 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 
 	private Map<Integer, Integer> lastWrittenTaskPercentage = new HashMap<>();
 
+	// Timing is disabled by default for performance.
+	private boolean timingIsEnabled = false;
+	private Map<Integer, Long> startTime = new HashMap<>();
+
 	private Document openXmlFile(int rank) {
 		String progressFilePath = LOG_FILE_PROGRESS_PREFIX + String.valueOf(rank) +
 			LOG_FILE_PROGRESS_POSTFIX;
@@ -202,6 +206,26 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			progressNode.setTextContent(String.valueOf(progress));
 		}
 
+		// Report duration of task (time from first % noted to 100%).
+		if (timingIsEnabled) {
+			if (progress == 0 || !startTime.containsKey(taskId)) {
+				// Start the timer.
+				startTime.put(taskId, System.nanoTime());
+			}
+			else if (progress == 100) {
+				// End the timer.
+				Node timingNode = document.createElement("time");
+				timingNode.setTextContent(String.valueOf(System.nanoTime() - startTime
+					.get(taskId)));
+				Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
+				if (taskNode == null) {
+					logger.warning("Task with id " + taskId + " could not be found!");
+					return -1;
+				}
+				taskNode.appendChild(timingNode);
+			}
+		}
+
 		// Save the document with the new progress:
 		saveXmlFile(rank, document);
 
@@ -228,5 +252,10 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			logger.warning(exc.getMessage());
 		}
 		return node;
+	}
+
+	@Override
+	public void enableTiming() {
+		this.timingIsEnabled = true;
 	}
 }

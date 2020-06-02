@@ -25,6 +25,10 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 
 	private boolean tasksWereReported = false;
 
+	// Timing is disabled by default for performance.
+	private boolean timingIsEnabled = false;
+	private Map<Integer, Long> startTime = new HashMap<>();
+
 	@Override
 	public int addTask(String description) {
 		if (!super.followsAddTaskRestrictions(tasksWereReported)) {
@@ -93,7 +97,22 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 			Path progressLogFilePath = Paths.get(LOG_FILE_PROGRESS_PREFIX + String
 				.valueOf(rank) + LOG_FILE_PROGRESS_POSTFIX);
 			String text = String.valueOf(taskId).concat(",").concat(String.valueOf(
-				progress)).concat(System.lineSeparator());
+				progress));
+
+			// Note time that a task took to finish (first % noted to 100%).
+			if (timingIsEnabled) {
+				long endTime;
+				if (progress == 0 || !startTime.containsKey(taskId)) {
+					startTime.put(taskId, System.nanoTime());
+				}
+				else if (progress == 100) {
+					endTime = System.nanoTime() - startTime.get(taskId);
+					text = text.concat(",").concat(String.valueOf(endTime));
+				}
+			}
+
+			text = text.concat(System.lineSeparator());
+
 			Files.write(progressLogFilePath, text.getBytes(),
 				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			updateLastUpdatedTimestamp(rank); // Note the time-stamp of the update
@@ -118,6 +137,11 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 			logger.warning("updateLastUpdatedTimestamp error - " + exc.getMessage());
 		}
 
+	}
+
+	@Override
+	public void enableTiming() {
+		this.timingIsEnabled = true;
 	}
 
 }

@@ -6,7 +6,7 @@ public class ParallelMacro {
 	private static Parallelism parallelism = new MPIParallelism();
 
 	private static ProgressLogging progressLogging = null;
-	
+
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
 	// This method resets the static state of the class:
@@ -63,6 +63,11 @@ public class ParallelMacro {
 
 	public static int barrier() {
 		return parallelism.barrier();
+	}
+	
+	public static void enableTiming() {
+		selectProgressLogger("");
+		progressLogging.enableTiming();
 	}
 
 	// Simple scatter which attempts to split the send buffer to equal parts among

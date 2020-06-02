@@ -11,4 +11,6 @@ public interface ProgressLogging {
 	public void reportTasks(int rank, int size);
 
 	public int reportProgress(int taskId, int progress, int rank);
+
+	public void enableTiming();
 }
