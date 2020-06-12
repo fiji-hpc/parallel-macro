@@ -10,28 +10,36 @@ import mpi.MPIException;
 
 public class MPIParallelism implements Parallelism {
 
+	private static MpiReflection mpiReflection;
+
+	// Find and load the mpi.jar from OpenMPI:
+	static {
+		mpiReflection = new MpiReflection();
+		String path = mpiReflection.findMpiJarFile();
+		mpiReflection.loadOpenMpi(path);
+	}
+
 	private final Logger logger = Logger.getLogger(ParallelMacro.class.getName());
 
 	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
 
 	@Override
 	public int initialise() {
-		String[] args = new String[1];
-		args[0] = "ImageJ-linux64";
+		String[] arg0 = { "one", "two" };
 		try {
-			MPI.Init(args);
+			mpiReflection.initialise(arg0);
 			return 0;
 		}
 		catch (Exception exc) {
 			logger.warning("MPI.Init() error - " + exc.getMessage());
+			return -1;
 		}
-		return -1;
 	}
 
 	@Override
 	public int finalise() {
 		try {
-			MPI.Finalize();
+			mpiReflection.finalise();
 			return 0;
 		}
 		catch (Exception exc) {
@@ -44,7 +52,7 @@ public class MPIParallelism implements Parallelism {
 	public int getRank() {
 		int rank = -1;
 		try {
-			rank = MPI.COMM_WORLD.getRank();
+			rank = mpiReflection.getRank();
 		}
 		catch (Exception e) {
 			logger.warning("MPI.COMM_WORLD.getRank() error - " + e.getMessage());
@@ -56,7 +64,7 @@ public class MPIParallelism implements Parallelism {
 	public int getSize() {
 		int size = -1;
 		try {
-			size = MPI.COMM_WORLD.getSize();
+			size = mpiReflection.getSize();
 		}
 		catch (Exception e) {
 			logger.warning("MPI.COMM_WORLD.getSize() error - " + e.getMessage());
@@ -67,7 +75,7 @@ public class MPIParallelism implements Parallelism {
 	@Override
 	public int barrier() {
 		try {
-			MPI.COMM_WORLD.barrier();
+			mpiReflection.barrier();
 			return 0;
 		}
 		catch (Exception exc) {
@@ -150,8 +158,8 @@ public class MPIParallelism implements Parallelism {
 			Datatype sendType = MPI.DOUBLE;
 			Datatype receiveType = sendType;
 
-			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType,
-				receiveBuffer, receiveCount, receiveType, root);
+			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType, receiveBuffer,
+				receiveCount, receiveType, root);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -173,8 +181,8 @@ public class MPIParallelism implements Parallelism {
 			Datatype sendType = MPI.DOUBLE;
 			Datatype receiveType = sendType;
 
-			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType,
-				receiveBuffer, receiveCount, receiveType, root);
+			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType, receiveBuffer,
+				receiveCount, receiveType, root);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
@@ -231,9 +239,8 @@ public class MPIParallelism implements Parallelism {
 		}
 
 		try {
-			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount,
-				MPI.DOUBLE, receivedBuffer, receiveCounts, displacements, MPI.DOUBLE,
-				receiver);
+			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount, MPI.DOUBLE, receivedBuffer,
+				receiveCounts, displacements, MPI.DOUBLE, receiver);
 		}
 		catch (MPIException exc) {
 			logger.warning(exc.getMessage());
