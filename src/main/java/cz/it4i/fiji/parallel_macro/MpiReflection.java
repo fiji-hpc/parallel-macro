@@ -12,18 +12,26 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MpiReflection {
 
-	private Object mpiInstance;
 	private Method mpiInit;
 	private Method mpiFinalize;
 	private Method mpiBarrier;
-	private Object commWorldInstance;
 	private Method mpiGetRank;
 	private Method mpiGetSize;
+	private Method mpiNewDoubleBuffer;
+	private Method mpiScatterv;
+	private Method mpiScatter;
+	private Method mpiGather;
+	private Method mpiGatherv;
+
+	private Object mpiInstance;
+	private Object commWorldInstance;
+	public Object mpiDoubleInstance;
 
 	public String findMpiJarFile() {
 		String script = "";
@@ -117,6 +125,9 @@ public class MpiReflection {
 			mpiInit = mpiClass.getDeclaredMethod("Init", String[].class);
 			mpiFinalize = mpiClass.getDeclaredMethod("Finalize");
 			Field commWorld = mpiClass.getDeclaredField("COMM_WORLD");
+			Field mpiDoubleField = mpiClass.getDeclaredField("DOUBLE");
+			Class<?> mpiDoubleClass = mpiDoubleField.getType();
+			mpiDoubleInstance = mpiDoubleField.get(mpiInstance);
 			commWorldInstance = commWorld.get(mpiInstance);
 			mpiBarrier = commWorldInstance.getClass().getMethod("barrier",
 				new Class[] {});
@@ -124,6 +135,21 @@ public class MpiReflection {
 				new Class[] {});
 			mpiGetSize = commWorldInstance.getClass().getMethod("getSize",
 				new Class[] {});
+			mpiNewDoubleBuffer = mpiClass.getMethod("newDoubleBuffer", int.class);
+
+			mpiScatterv = commWorldInstance.getClass().getMethod("scatterv",
+				Object.class, int[].class, int[].class, mpiDoubleClass, Object.class,
+				int.class, mpiDoubleClass, int.class);
+
+			mpiScatter = commWorldInstance.getClass().getMethod("scatter",
+				Object.class, int.class, mpiDoubleClass, Object.class, int.class,
+				mpiDoubleClass, int.class);
+			mpiGather = commWorldInstance.getClass().getMethod("gather", Object.class,
+				int.class, mpiDoubleClass, Object.class, int.class, mpiDoubleClass,
+				int.class);
+			mpiGatherv = commWorldInstance.getClass().getMethod("gatherv",
+				Object.class, int.class, mpiDoubleClass, Object.class, int[].class,
+				int[].class, mpiDoubleClass, int.class);
 		}
 		catch (MalformedURLException | ClassNotFoundException
 				| NoSuchMethodException | SecurityException | IllegalAccessException
@@ -165,5 +191,55 @@ public class MpiReflection {
 		InvocationTargetException
 	{
 		mpiBarrier.invoke(commWorldInstance);
+	}
+
+	public DoubleBuffer newDoubleBuffer(int size) {
+		Object temp;
+		try {
+			temp = mpiNewDoubleBuffer.invoke(mpiInstance, size);
+		}
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
+			// In case of error allocate a 0 size double buffer.
+			return DoubleBuffer.allocate(0);
+		}
+		return (DoubleBuffer) temp;
+	}
+
+	public void scatterv(Object sendBuffer, int[] sendCounts, int[] displacements,
+		Object mpiSendDataType, Object receiveBuffer, int receiveCount,
+		Object mpiReceiveDataType, int sender) throws IllegalAccessException,
+		IllegalArgumentException, InvocationTargetException
+	{
+		mpiScatterv.invoke(commWorldInstance, sendBuffer, sendCounts, displacements,
+			mpiSendDataType, receiveBuffer, receiveCount, mpiReceiveDataType, sender);
+	}
+
+	public void scatter(Object sendBuffer, int sendCount, Object mpiSendDataType,
+		Object receiveBuffer, int receiveCount, Object mpiReceiveDataType, int root)
+		throws IllegalAccessException, IllegalArgumentException,
+		InvocationTargetException
+	{
+		mpiScatter.invoke(commWorldInstance, sendBuffer, sendCount, mpiSendDataType,
+			receiveBuffer, receiveCount, mpiReceiveDataType, root);
+	}
+
+	public void gather(Object sendBuffer, int sendCount, Object mpiSendDataType,
+		Object receiveBuffer, int receiveCount, Object mpiReceiveDataType, int root)
+		throws IllegalAccessException, IllegalArgumentException,
+		InvocationTargetException
+	{
+		mpiGather.invoke(commWorldInstance, sendBuffer, sendCount, mpiSendDataType,
+			receiveBuffer, receiveCount, mpiReceiveDataType, root);
+	}
+
+	public void gatherv(Object sendBuffer, int sendCount, Object mpiSendDataTypes,
+		Object receivedBuffer, int[] receiveCounts, int[] displacements,
+		Object mpiReceiveDataTypes, int receiver) throws IllegalAccessException,
+		IllegalArgumentException, InvocationTargetException
+	{
+		mpiGatherv.invoke(sendBuffer, sendCount, mpiSendDataTypes, receivedBuffer,
+			receiveCounts, displacements, mpiReceiveDataTypes, receiver);
 	}
 }

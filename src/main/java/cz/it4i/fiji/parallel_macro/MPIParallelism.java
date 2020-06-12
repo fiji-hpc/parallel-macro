@@ -1,12 +1,9 @@
 
 package cz.it4i.fiji.parallel_macro;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.DoubleBuffer;
 import java.util.logging.Logger;
-
-import mpi.Datatype;
-import mpi.MPI;
-import mpi.MPIException;
 
 public class MPIParallelism implements Parallelism {
 
@@ -116,12 +113,15 @@ public class MPIParallelism implements Parallelism {
 			}
 		}
 
-		DoubleBuffer receiveBuffer = MPI.newDoubleBuffer(receiveCount);
+		DoubleBuffer receiveBuffer = mpiReflection.newDoubleBuffer(receiveCount);
 		try {
-			MPI.COMM_WORLD.scatterv(sendBuffer, sendCounts, displacements, MPI.DOUBLE,
-				receiveBuffer, receiveCount, MPI.DOUBLE, sender);
+			mpiReflection.scatterv(sendBuffer, sendCounts, displacements,
+				mpiReflection.mpiDoubleInstance, receiveBuffer, receiveCount,
+				mpiReflection.mpiDoubleInstance, sender);
 		}
-		catch (MPIException exc) {
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
 			logger.warning(exc.getMessage());
 		}
 
@@ -139,7 +139,7 @@ public class MPIParallelism implements Parallelism {
 			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
 		}
 		else {
-			sendBuffer = MPI.newDoubleBuffer(0);
+			sendBuffer = mpiReflection.newDoubleBuffer(0);
 		}
 
 		DoubleBuffer receiveBuffer = scatterArray(sendBuffer, sendCount,
@@ -152,16 +152,16 @@ public class MPIParallelism implements Parallelism {
 		int receiveCount, int root)
 	{
 		// The receive buffer will be of the same type as the send buffer:
-		DoubleBuffer receiveBuffer = MPI.newDoubleBuffer(receiveCount);
+		DoubleBuffer receiveBuffer = mpiReflection.newDoubleBuffer(receiveCount);
 
 		try {
-			Datatype sendType = MPI.DOUBLE;
-			Datatype receiveType = sendType;
-
-			MPI.COMM_WORLD.scatter(sendBuffer, sendCount, sendType, receiveBuffer,
-				receiveCount, receiveType, root);
+			mpiReflection.scatter(sendBuffer, sendCount,
+				mpiReflection.mpiDoubleInstance, receiveBuffer, receiveCount,
+				mpiReflection.mpiDoubleInstance, root);
 		}
-		catch (MPIException exc) {
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
 			logger.warning(exc.getMessage());
 		}
 		return receiveBuffer;
@@ -174,17 +174,17 @@ public class MPIParallelism implements Parallelism {
 		DoubleBuffer receiveBuffer = null;
 		// Only the specified node will gather the send items:
 		if (getRank() == root) {
-			receiveBuffer = MPI.newDoubleBuffer(receiveCount * getSize());
+			receiveBuffer = mpiReflection.newDoubleBuffer(receiveCount * getSize());
 		}
 
 		try {
-			Datatype sendType = MPI.DOUBLE;
-			Datatype receiveType = sendType;
-
-			MPI.COMM_WORLD.gather(sendBuffer, sendCount, sendType, receiveBuffer,
-				receiveCount, receiveType, root);
+			mpiReflection.gather(sendBuffer, sendCount,
+				mpiReflection.mpiDoubleInstance, receiveBuffer, receiveCount,
+				mpiReflection.mpiDoubleInstance, root);
 		}
-		catch (MPIException exc) {
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
 			logger.warning(exc.getMessage());
 		}
 		return receiveBuffer;
@@ -199,7 +199,7 @@ public class MPIParallelism implements Parallelism {
 			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
 		}
 		else {
-			sendBuffer = MPI.newDoubleBuffer(0);
+			sendBuffer = mpiReflection.newDoubleBuffer(0);
 		}
 
 		DoubleBuffer receiveBuffer = gatherArray(sendBuffer, sendCount,
@@ -232,17 +232,20 @@ public class MPIParallelism implements Parallelism {
 
 		DoubleBuffer receivedBuffer;
 		if (getRank() == receiver) {
-			receivedBuffer = MPI.newDoubleBuffer(totalReceiveBufferLength);
+			receivedBuffer = mpiReflection.newDoubleBuffer(totalReceiveBufferLength);
 		}
 		else {
-			receivedBuffer = MPI.newDoubleBuffer(0);
+			receivedBuffer = mpiReflection.newDoubleBuffer(0);
 		}
 
 		try {
-			MPI.COMM_WORLD.gatherv(sendBuffer, sendCount, MPI.DOUBLE, receivedBuffer,
-				receiveCounts, displacements, MPI.DOUBLE, receiver);
+			mpiReflection.gatherv(sendBuffer, sendCount,
+				mpiReflection.mpiDoubleInstance, receivedBuffer, receiveCounts,
+				displacements, mpiReflection.mpiDoubleInstance, receiver);
 		}
-		catch (MPIException exc) {
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException exc)
+		{
 			logger.warning(exc.getMessage());
 		}
 
