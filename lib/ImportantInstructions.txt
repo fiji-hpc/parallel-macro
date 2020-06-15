@@ -1,1 +1,0 @@
-Put mpi.jar from the OpenMPI that is found on the HPC cluster you are working on in this folder (lib).

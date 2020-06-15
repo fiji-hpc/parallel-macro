@@ -89,7 +89,7 @@ public class MPIParallelism implements Parallelism {
 	{
 		// Convert comma separated string to double buffer:
 		DoubleBuffer sendBuffer = converter.convertCommaSeparatedStringToBuffer(
-			sendString);
+			sendString, mpiReflection);
 
 		int size = getSize();
 		int myRank = getRank();
@@ -136,7 +136,8 @@ public class MPIParallelism implements Parallelism {
 	{
 		DoubleBuffer sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
+			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString,
+				mpiReflection);
 		}
 		else {
 			sendBuffer = mpiReflection.newDoubleBuffer(0);
@@ -196,7 +197,8 @@ public class MPIParallelism implements Parallelism {
 	{
 		DoubleBuffer sendBuffer;
 		if (!sendString.isEmpty()) {
-			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString);
+			sendBuffer = converter.convertCommaSeparatedStringToBuffer(sendString,
+				mpiReflection);
 		}
 		else {
 			sendBuffer = mpiReflection.newDoubleBuffer(0);
@@ -214,7 +216,7 @@ public class MPIParallelism implements Parallelism {
 	{
 		// Convert comma separated string to array:
 		DoubleBuffer sendBuffer = converter.convertCommaSeparatedStringToBuffer(
-			sendString);
+			sendString, mpiReflection);
 
 		int size = getSize();
 

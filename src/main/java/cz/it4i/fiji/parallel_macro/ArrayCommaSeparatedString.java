@@ -4,11 +4,11 @@ package cz.it4i.fiji.parallel_macro;
 import java.nio.DoubleBuffer;
 import java.util.regex.Pattern;
 
-import mpi.MPI;
-
 public class ArrayCommaSeparatedString {
 
-	public String convertBufferToCommaSeparatedString(DoubleBuffer buffer, int length) {
+	public String convertBufferToCommaSeparatedString(DoubleBuffer buffer,
+		int length)
+	{
 		if (buffer != null) {
 			StringBuilder bld = new StringBuilder();
 			for (int i = 0; i < length; i++) {
@@ -22,12 +22,14 @@ public class ArrayCommaSeparatedString {
 		return "";
 	}
 
-	public DoubleBuffer convertCommaSeparatedStringToBuffer(String string) {
+	public DoubleBuffer convertCommaSeparatedStringToBuffer(String string,
+		MpiReflection mpiReflection)
+	{
 		Pattern pattern = Pattern.compile(",");
-		double[] tempArray = pattern.splitAsStream(string).mapToDouble(Double::parseDouble)
-		.toArray();
-		DoubleBuffer tempBuffer = MPI.newDoubleBuffer(tempArray.length);
-		for(int i = 0; i < tempArray.length; i++) {
+		double[] tempArray = pattern.splitAsStream(string).mapToDouble(
+			Double::parseDouble).toArray();
+		DoubleBuffer tempBuffer = mpiReflection.newDoubleBuffer(tempArray.length);
+		for (int i = 0; i < tempArray.length; i++) {
 			tempBuffer.put(tempArray[i]);
 		}
 		return tempBuffer;
