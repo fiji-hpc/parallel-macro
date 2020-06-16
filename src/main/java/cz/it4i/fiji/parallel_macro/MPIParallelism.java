@@ -207,7 +207,7 @@ public class MPIParallelism implements Parallelism {
 		DoubleBuffer receiveBuffer = gatherArray(sendBuffer, sendCount,
 			receiveCount, root);
 		return converter.convertBufferToCommaSeparatedString(receiveBuffer,
-			receiveCount);
+			receiveCount*getSize());
 	}
 
 	@Override
