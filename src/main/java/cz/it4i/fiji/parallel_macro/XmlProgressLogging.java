@@ -12,21 +12,24 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 	ProgressLogging
 {
 
-	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
+	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class
+		.getName());
 
 	private Map<Integer, String> tasks = new HashMap<>();
 
@@ -53,7 +56,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			document = dBuilder.parse(progressFilePath);
 		}
 		catch (Exception exc) {
-			logger.warning(exc.getMessage());
+			logger.error("Error could not open XML file: {} ", exc.getMessage());
 		}
 		return document;
 	}
@@ -71,7 +74,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			document.appendChild(rootElement);
 		}
 		catch (Exception exc) {
-			logger.warning(exc.getMessage());
+			logger.error("Error can not create XML file: {} ", exc.getMessage());
 		}
 
 		return document;
@@ -79,7 +82,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 
 	private void updateLastUpdatedTimestamp(Document document) {
 		NodeList nodeList = document.getElementsByTagName("lastUpdated");
-		long timestamp = java.time.Instant.now().toEpochMilli();
+		long timestamp = Instant.now().toEpochMilli();
 		// Update the time-stamp if the XML element already exists or create it if
 		// it does not:
 		if (nodeList.getLength() != 0) {
@@ -102,7 +105,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 		String progressFilePath = LOG_FILE_PROGRESS_PREFIX + String.valueOf(rank) +
 			LOG_FILE_PROGRESS_POSTFIX;
 		try {
-			// Write the content into xml file:
+			// Write the content into XML file:
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
 			Transformer transformer;
@@ -113,7 +116,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			transformer.transform(source, result);
 		}
 		catch (Exception exc) {
-			logger.warning(exc.getMessage());
+			logger.error("Error can not save XML file {} ", exc.getMessage());
 		}
 	}
 
@@ -137,7 +140,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 		Document document = createXmlFile();
 
 		if (document == null) {
-			logger.warning("Xml document does not exist!");
+			logger.error("Xml document does not exist!");
 			return;
 		}
 
@@ -185,7 +188,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 		Document document = openXmlFile(rank);
 
 		if (document == null) {
-			logger.warning("Xml document does not exist!");
+			logger.error("XML document does not exist!");
 			return -1;
 		}
 
@@ -197,7 +200,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			progressNode.setTextContent(String.valueOf(progress));
 			Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
 			if (taskNode == null) {
-				logger.warning("Task with id " + taskId + " could not be found!");
+				logger.error("Task with id {} could not be found!", taskId);
 				return -1;
 			}
 			taskNode.appendChild(progressNode);
@@ -219,7 +222,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 					.get(taskId)));
 				Node taskNode = findNode(document, "//task[@id='" + taskId + "']");
 				if (taskNode == null) {
-					logger.warning("Task with id " + taskId + " could not be found!");
+					logger.error("Task with id {} could not be found!", taskId);
 					return -1;
 				}
 				taskNode.appendChild(timingNode);
@@ -249,7 +252,7 @@ public class XmlProgressLogging extends ProgressLoggingRestrictions implements
 			node = (Node) expr.evaluate(document, XPathConstants.NODE);
 		}
 		catch (Exception exc) {
-			logger.warning(exc.getMessage());
+			logger.error(" Could not find node in XML file. {} ", exc.getMessage());
 		}
 		return node;
 	}

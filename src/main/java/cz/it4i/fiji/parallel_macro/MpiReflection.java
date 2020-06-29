@@ -16,7 +16,12 @@ import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MpiReflection {
+
+	Logger logger = LoggerFactory.getLogger(MpiReflection.class);
 
 	private Method mpiInit;
 	private Method mpiFinalize;
@@ -50,9 +55,9 @@ public class MpiReflection {
 			script = bld.toString();
 
 		}
-		catch (IOException exc1) {
-			System.out.println("Could not read script in resources!");
-			exc1.printStackTrace();
+		catch (IOException exception) {
+			logger.error("Could not read script in resources! \n {} ", exception
+				.getMessage());
 		}
 
 		// Write the script file:
@@ -61,12 +66,11 @@ public class MpiReflection {
 		{
 			out.println(script);
 		}
-		catch (FileNotFoundException exc1) {
-			System.out.println("Could not copy file.");
-			exc1.printStackTrace();
+		catch (FileNotFoundException exception) {
+			logger.error("Could not copy file. \n {} ", exception.getMessage());
 		}
 
-		System.out.println("Read the script:\n" + script);
+		logger.debug("Read the script:\n {} ", script);
 
 		try {
 			// Execute the script:
@@ -79,33 +83,33 @@ public class MpiReflection {
 				.getInputStream()));
 			List<String> files = new ArrayList<>();
 			String line = "";
-			System.out.println("Output of the command.");
+			logger.debug("Standard output of the find mpi.jar script.");
 			while ((line = output.readLine()) != null) {
 				files.add(line);
-				System.out.println(line + "\n");
+				logger.debug("{} \n", line);
 			}
 
 			// Read the error of the script:
+			logger.debug("Error output of the find mpi.jar script.");
 			BufferedReader error = new BufferedReader(new InputStreamReader(p
 				.getErrorStream()));
 			while ((line = error.readLine()) != null) {
-				System.out.println(line + "\n");
+				logger.debug("{} \n", line);
 			}
 
 			// Dynamically link the files.
 			if (!files.isEmpty()) {
 				jarPath = files.get(0);
-				System.out.println("Dynamically load from: " + jarPath);
 			}
 			else {
-				System.out.println("No OpenMPI was found on your system." +
+				logger.error("No OpenMPI was found on your system." +
 					" Please install OpenMPI before using Parallel-Macro.");
 				System.exit(0);
 			}
 		}
 		catch (IOException exc) {
-			System.out.println("OpenMPI's mpi.jar was not found on this system.");
-			exc.printStackTrace();
+			logger.error("OpenMPI's mpi.jar was not found on this system. \n {}", exc
+				.getMessage());
 			System.exit(0);
 		}
 
@@ -113,7 +117,7 @@ public class MpiReflection {
 	}
 
 	public void loadOpenMpi(String path) {
-		System.out.println("The path of MPI.jar is: " + path);
+		logger.info("The path of MPI.jar is: {}", path);
 		try {
 			URLClassLoader child;
 			child = new URLClassLoader(new URL[] { new URL("file://" + path) },

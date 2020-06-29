@@ -7,15 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileProgressLogging extends ProgressLoggingRestrictions implements
 	ProgressLogging
 {
 
-	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
+	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class);
 
 	private Map<Integer, String> tasks = new HashMap<>();
 
@@ -71,7 +74,8 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 
 		}
 		catch (IOException exc) {
-			logger.warning("" + exc.getMessage());
+			logger.error(" Error occurred during reporting tasks: {} ", exc
+				.getMessage());
 		}
 
 		// The tasks should not be reported twice:
@@ -118,7 +122,8 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 			updateLastUpdatedTimestamp(rank); // Note the time-stamp of the update
 		}
 		catch (IOException exc) {
-			logger.warning("reportProgress error - " + exc.getMessage());
+			logger.error(" Error occurred during report progress error: {} ", exc
+				.getMessage());
 			return -1;
 		}
 		return 0;
@@ -130,11 +135,12 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 				LOG_FILE_PROGRESS_POSTFIX, "rw"))
 		{
 			writer.readLine(); // Ignore, the first line is the number of nodes.
-			writer.writeBytes(Long.toString(java.time.Instant.now().toEpochMilli())
-				.concat(System.lineSeparator()));
+			writer.writeBytes(Long.toString(Instant.now().toEpochMilli()).concat(
+				System.lineSeparator()));
 		}
 		catch (IOException exc) {
-			logger.warning("updateLastUpdatedTimestamp error - " + exc.getMessage());
+			logger.error("Error occurred while updating last updated timestamp: {} ",
+				exc.getMessage());
 		}
 
 	}

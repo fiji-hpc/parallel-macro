@@ -3,7 +3,8 @@ package cz.it4i.fiji.parallel_macro;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.DoubleBuffer;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MPIParallelism implements Parallelism {
 
@@ -16,7 +17,7 @@ public class MPIParallelism implements Parallelism {
 		mpiReflection.loadOpenMpi(path);
 	}
 
-	private final Logger logger = Logger.getLogger(ParallelMacro.class.getName());
+	Logger logger = LoggerFactory.getLogger(MPIParallelism.class);
 
 	private ArrayCommaSeparatedString converter = new ArrayCommaSeparatedString();
 
@@ -28,7 +29,7 @@ public class MPIParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.warning("MPI.Init() error - " + exc.getMessage());
+			logger.error("MPI initialization error: {} ", exc.getMessage());
 			return -1;
 		}
 	}
@@ -40,7 +41,7 @@ public class MPIParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.warning("MPI.Finalize() error - " + exc.getMessage());
+			logger.error("MPI finalization error: {} ", exc.getMessage());
 		}
 		return -1;
 	}
@@ -51,8 +52,8 @@ public class MPIParallelism implements Parallelism {
 		try {
 			rank = mpiReflection.getRank();
 		}
-		catch (Exception e) {
-			logger.warning("MPI.COMM_WORLD.getRank() error - " + e.getMessage());
+		catch (Exception exc) {
+			logger.error("MPI get rank error: {} ", exc.getMessage());
 		}
 		return rank;
 	}
@@ -63,8 +64,8 @@ public class MPIParallelism implements Parallelism {
 		try {
 			size = mpiReflection.getSize();
 		}
-		catch (Exception e) {
-			logger.warning("MPI.COMM_WORLD.getSize() error - " + e.getMessage());
+		catch (Exception exc) {
+			logger.error("MPI get size error: {} ", exc.getMessage());
 		}
 		return size;
 	}
@@ -76,7 +77,7 @@ public class MPIParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.warning("MPI.COMM_WORLD.barrier() error - " + exc.getMessage());
+			logger.error("MPI barrier error: {} ", exc.getMessage());
 		}
 		return -1;
 	}
@@ -122,7 +123,7 @@ public class MPIParallelism implements Parallelism {
 		catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException exc)
 		{
-			logger.warning(exc.getMessage());
+			logger.error("MPI scatterv error: {} ", exc.getMessage());
 		}
 
 		// Convert back to string and return:
@@ -163,7 +164,7 @@ public class MPIParallelism implements Parallelism {
 		catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException exc)
 		{
-			logger.warning(exc.getMessage());
+			logger.error("MPI scatter error: {} ", exc.getMessage());
 		}
 		return receiveBuffer;
 	}
@@ -186,7 +187,7 @@ public class MPIParallelism implements Parallelism {
 		catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException exc)
 		{
-			logger.warning(exc.getMessage());
+			logger.error("MPI gather error: {} ", exc.getMessage());
 		}
 		return receiveBuffer;
 	}
@@ -207,7 +208,7 @@ public class MPIParallelism implements Parallelism {
 		DoubleBuffer receiveBuffer = gatherArray(sendBuffer, sendCount,
 			receiveCount, root);
 		return converter.convertBufferToCommaSeparatedString(receiveBuffer,
-			receiveCount*getSize());
+			receiveCount * getSize());
 	}
 
 	@Override
@@ -248,7 +249,7 @@ public class MPIParallelism implements Parallelism {
 		catch (IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException exc)
 		{
-			logger.warning(exc.getMessage());
+			logger.error("MPI gatherv error: {} ", exc.getMessage());
 		}
 
 		// Convert back to string and return:

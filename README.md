@@ -8,21 +8,27 @@ There are two Fiji installations needed:
 * One on the local system which runs the HPC Workflow Manager client.
 * Another located at the target system, a computer-cluster.
 
-## Build and Install
+## Build 
+Use maven with package target to build a jar of this project.
+
+## Install
 Before building this package you must:
-* make sure that OpenMPI is installed with the Java bindings configured on your target system;
-* copy mpi.jar from the lib directory of the OpenMPI installation of the targeted system;
-* paste it in the lib directory of your copy of this project;
-Finally, build the package using maven.
+* Make sure that OpenMPI is installed (or available as a module) with the Java bindings configured on your target system.
 
 Steps for installation:
-* Copy the resulting jar file of the project;
+* Copy the jar file of the project that you build;
 * download and install Fiji on the target system (if it is not already installed);
 * paste the project's jar file in Fiji's either plugins or jars directory (any one of the two directories).
 
 It should now be ready for use. 
-If it does not work make sure that you used the correct mpi.jar on the correct Fiji installation.
+### If it does not work:
+Make sure that the directory mpi.jar is in the $LD\_LIBRARY\_PATH of the target system.
+Parallel-Macro will find the mpi.jar automatically in the directories listed in the environment variable.
+It will also try to "ml" or "module load" the OpenMPI 4.0 module before looking in the environment variable.
+
 You will need to repeat the instructions for every target system.
 
-For example, this plugin was tested with the Salomon supercomputer.
+If you need to manually add the path of mpi.jar in $LD\_LIBRARY\_PATH it is located in OpenMPI's lib directory.
+
+For example, this plugin was tested on the Salomon supercomputer.
 The mpi.jar on Salomon is located at /apps/all/OpenMPI/4.0.0-GCC-6.3.0-2.27/lib

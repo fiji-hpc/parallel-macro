@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TextReportLogging {
 
-	private Logger logger = Logger.getLogger(ParallelMacro.class.getName());
+	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class);
 
 	private static final String LOG_FILE_REPORT_PREFIX = "report_";
 	private static final String LOG_FILE_REPORT_POSTFIX = ".tlog";
@@ -21,7 +23,7 @@ public class TextReportLogging {
 					.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 		}
 		catch (IOException exc) {
-			logger.warning("reportText error - " + exc.getMessage());
+			logger.error("Report text error: {} ", exc.getMessage());
 			return -1;
 		}
 		return 0;
