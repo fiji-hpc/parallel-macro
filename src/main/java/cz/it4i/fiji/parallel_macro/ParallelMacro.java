@@ -9,6 +9,11 @@ public class ParallelMacro {
 
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
+	static {
+		MacroFunctionWrapper macroFunctionWrapper = new MacroFunctionWrapper();
+		macroFunctionWrapper.wrapFunctions();
+	}
+
 	// This method resets the static state of the class:
 	public static void resetState() {
 		parallelism = new MPIParallelism();
@@ -64,7 +69,7 @@ public class ParallelMacro {
 	public static int barrier() {
 		return parallelism.barrier();
 	}
-	
+
 	public static void enableTiming() {
 		selectProgressLogger("");
 		progressLogging.enableTiming();
