@@ -25,7 +25,9 @@ public class MPIParallelism implements Parallelism {
 	public int initialise() {
 		String[] arg0 = { "one", "two" };
 		try {
-			mpiReflection.initialise(arg0);
+			if (!mpiReflection.isInitialized()) {
+				mpiReflection.initialise(arg0);				
+			}
 			return 0;
 		}
 		catch (Exception exc) {

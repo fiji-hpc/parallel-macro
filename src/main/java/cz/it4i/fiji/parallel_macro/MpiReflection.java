@@ -24,6 +24,7 @@ public class MpiReflection {
 	Logger logger = LoggerFactory.getLogger(MpiReflection.class);
 
 	private Method mpiInit;
+	private Method mpiIsInitialized;
 	private Method mpiFinalize;
 	private Method mpiBarrier;
 	private Method mpiGetRank;
@@ -127,6 +128,7 @@ public class MpiReflection {
 
 			// Methods:
 			mpiInit = mpiClass.getDeclaredMethod("Init", String[].class);
+			mpiIsInitialized = mpiClass.getDeclaredMethod("isInitialized");
 			mpiFinalize = mpiClass.getDeclaredMethod("Finalize");
 			Field commWorld = mpiClass.getDeclaredField("COMM_WORLD");
 			Field mpiDoubleField = mpiClass.getDeclaredField("DOUBLE");
@@ -175,6 +177,13 @@ public class MpiReflection {
 		IllegalArgumentException, InvocationTargetException
 	{
 		mpiFinalize.invoke(mpiInstance);
+	}
+
+	public boolean isInitialized() throws IllegalAccessException,
+		IllegalArgumentException, InvocationTargetException
+	{
+		Object isInitialized = mpiIsInitialized.invoke(commWorldInstance);
+		return (boolean) isInitialized;
 	}
 
 	public int getRank() throws IllegalAccessException, IllegalArgumentException,
