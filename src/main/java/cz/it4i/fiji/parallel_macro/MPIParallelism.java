@@ -25,7 +25,7 @@ public class MPIParallelism implements Parallelism {
 	public int initialise() {
 		String[] arg0 = { "one", "two" };
 		try {
-			if (!mpiReflection.isInitialized()) {
+			if (!mpiReflection.isInitialised()) {
 				mpiReflection.initialise(arg0);				
 			}
 			return 0;
@@ -39,7 +39,9 @@ public class MPIParallelism implements Parallelism {
 	@Override
 	public int finalise() {
 		try {
-			mpiReflection.finalise();
+			if(!mpiReflection.isFinalised()) {
+				mpiReflection.finalise();
+			}
 			return 0;
 		}
 		catch (Exception exc) {

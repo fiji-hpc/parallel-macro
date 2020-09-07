@@ -34,6 +34,7 @@ public class MpiReflection {
 	private Method mpiScatter;
 	private Method mpiGather;
 	private Method mpiGatherv;
+	private Method mpiIsFinalized;
 
 	private Object mpiInstance;
 	private Object commWorldInstance;
@@ -129,6 +130,7 @@ public class MpiReflection {
 			// Methods:
 			mpiInit = mpiClass.getDeclaredMethod("Init", String[].class);
 			mpiIsInitialized = mpiClass.getDeclaredMethod("isInitialized");
+			mpiIsFinalized = mpiClass.getDeclaredMethod("isFinalized");
 			mpiFinalize = mpiClass.getDeclaredMethod("Finalize");
 			Field commWorld = mpiClass.getDeclaredField("COMM_WORLD");
 			Field mpiDoubleField = mpiClass.getDeclaredField("DOUBLE");
@@ -179,11 +181,18 @@ public class MpiReflection {
 		mpiFinalize.invoke(mpiInstance);
 	}
 
-	public boolean isInitialized() throws IllegalAccessException,
+	public boolean isInitialised() throws IllegalAccessException,
 		IllegalArgumentException, InvocationTargetException
 	{
-		Object isInitialized = mpiIsInitialized.invoke(commWorldInstance);
+		Object isInitialized = mpiIsInitialized.invoke(mpiInstance);
 		return (boolean) isInitialized;
+	}
+
+	public boolean isFinalised() throws IllegalAccessException,
+		IllegalArgumentException, InvocationTargetException
+	{
+		Object isFinalized = mpiIsFinalized.invoke(mpiInstance);
+		return (boolean) isFinalized;
 	}
 
 	public int getRank() throws IllegalAccessException, IllegalArgumentException,
