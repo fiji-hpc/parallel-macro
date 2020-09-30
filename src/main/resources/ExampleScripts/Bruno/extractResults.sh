@@ -4,7 +4,7 @@ FILES=./*.OU
 # Create the temporary data file
 touch temp_data.dat
 
-# Collumn info: Number of nodes, Time in seconds
+# Column info: Number of nodes, Time in seconds
 for f in $FILES
 do
     time=$(ps -ef | awk '/^Total execution time/ {printf "%s",$4; exit;}' $f)
