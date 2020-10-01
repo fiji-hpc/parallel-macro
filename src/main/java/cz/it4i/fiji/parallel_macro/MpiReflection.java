@@ -2,10 +2,8 @@
 package cz.it4i.fiji.parallel_macro;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,7 +39,9 @@ public class MpiReflection {
 	public Object mpiDoubleInstance;
 
 	public String findMpiJarFile() {
-		String script = "";
+		// Surround script with parenthesis
+		// to run multiline command:
+		String script = "(" + '\n';
 		String jarPath = "";
 		try {
 			// Read script file:
@@ -51,34 +51,23 @@ public class MpiReflection {
 			String line = reader.readLine();
 			StringBuilder bld = new StringBuilder();
 			while (line != null) {
-				bld.append(line + "\n");
+				bld.append(line + '\n');
 				line = reader.readLine();
 			}
 			script = bld.toString();
-
 		}
 		catch (IOException exception) {
 			logger.error("Could not read script in resources! \n {} ", exception
 				.getMessage());
 		}
+		script += '\n' + ")";
 
-		// Write the script file:
-		try (PrintWriter out = new PrintWriter(System.getProperty("user.home") +
-			"/findMpiJar.sh"))
-		{
-			out.println(script);
-		}
-		catch (FileNotFoundException exception) {
-			logger.error("Could not copy file. \n {} ", exception.getMessage());
-		}
-
-		logger.debug("Read the script:\n {} ", script);
+		logger.debug("Loaded the script:\n {} ", script);
 
 		try {
 			// Execute the script:
-			String createAndRunCommand = "/bin/sh $HOME/findMpiJar.sh;";
 			Process p = Runtime.getRuntime().exec(new String[] { "bash", "-c",
-				createAndRunCommand });
+				script });
 
 			// Read the output of the script:
 			BufferedReader output = new BufferedReader(new InputStreamReader(p
