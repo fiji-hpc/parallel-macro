@@ -51,24 +51,20 @@ parInit();
 	preprocessingTask = parAddTask("Preprocessing");
 	parReportTasks();
 
-	// Username, change this before running:
-	username = "dsv";
-
 	// Get the rank of the node and number of nodes available:
 	myRank = parseInt(parGetRank());
 	size = parseInt(parGetSize());
 	
 	// Input and output folders on the cluster:
-	//inputFolder = "/scratch/work/project/open-19-3/preibisch-data";
-	inputFolder = "/home/"+username+"/preibisch-data/";
-	outputFolder = "/home/"+username+"/preibisch-output/";
+	inputFolder = "/scratch/work/project/open-19-3/experiment/input/";
+	outputFolder = "/scratch/work/project/open-19-3/experiment/output/";
 	
 	// File prefix and postfix
 	prefix = "fused_tp_0_ch_";
 	postfix = ".tif";
 	
 	// Number of files
-	files = 100;//1056;
+	files = 1056;
 
 	// Batch mode on
 	setBatchMode(true);
@@ -97,10 +93,10 @@ parInit();
 	print("Rank: "+myRank+" size: "+size+" start: "+start[myRank]+" end: "+end[myRank]+" part size: "+chunk[myRank]);
 
 	
-	progress = 0;	
+	progress = 0;
 	parReportProgress(preprocessingTask, progress);
 	for (i=start[myRank]; i < end[myRank]; i++) {
-		starImageTime = getTime();
+		startImageTime = getTime();
 		
 		// Open the file
 		fileName = prefix+formatNumber(i)+postfix;
@@ -108,7 +104,7 @@ parInit();
 				
 		// Enhance contrast
 		run("Enhance Contrast...", "saturated=0.3");
-		// Gausian blur
+		// Gaussian blur
 		run("Gaussian Blur...", "sigma=2");
 		// Edge detection
 		run("Find Edges");
@@ -116,7 +112,7 @@ parInit();
 		// Save the processed file:
 		saveAs("Tiff", outputFolder + fileName); 
 		
-		print("Image "+(i+1)+" time: "+(getTime() - starImageTime)/1000+" seconds");
+		print("Image "+(i+1)+" time: "+(getTime() - startImageTime)/1000+" seconds");
 
 		progress += 1;
 		parReportProgress(preprocessingTask,progress/chunk[myRank]*100);
