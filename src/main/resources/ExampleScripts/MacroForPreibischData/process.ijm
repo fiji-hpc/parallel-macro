@@ -52,8 +52,8 @@ parInit();
 	parReportTasks();
 
 	// Get the rank of the node and number of nodes available:
-	myRank = parseInt(parGetRank());
-	size = parseInt(parGetSize());
+	myRank = parGetRank();
+	size = parGetSize();
 	
 	// Input and output folders on the cluster:
 	inputFolder = "/scratch/work/project/open-19-3/experiment/input/";

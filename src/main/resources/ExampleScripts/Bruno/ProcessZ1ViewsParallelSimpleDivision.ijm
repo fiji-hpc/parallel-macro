@@ -31,8 +31,8 @@ parInit();
 	print("Started");
 
 	// Get the rank of the node and number of nodes available:
-	myRank = parseInt(parGetRank());
-	size = parseInt(parGetSize());
+	myRank = parGetRank();
+	size = parGetSize();
 
 	// Also save the output in a directory by size (total number of nodes):
 	outputFolder += ""+size+"/";

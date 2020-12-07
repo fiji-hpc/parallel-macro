@@ -15,8 +15,8 @@ parInit();
 	username = "dsv";
 
 	// Get the rank of the node and number of nodes available:
-	myRank = parseInt(parGetRank());
-	size = parseInt(parGetSize());
+	myRank = parGetRank();
+	size = parGetSize();
 	
 	// Input folder
 	inputFolder = "/home/"+username+"/CLUSTER_TEST/";
