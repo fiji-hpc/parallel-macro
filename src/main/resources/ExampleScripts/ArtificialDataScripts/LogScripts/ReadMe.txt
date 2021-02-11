@@ -1,0 +1,1 @@
+Place these scripts in the logs directory.
