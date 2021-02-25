@@ -5,8 +5,6 @@
 
 #@ OpService ops
 #@ SCIFIO scifio
-#@ String input_path
-#@ String output_path
 #@ UIService ui
 #@ DatasetService datasets
 

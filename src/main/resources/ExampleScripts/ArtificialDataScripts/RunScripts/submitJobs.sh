@@ -4,16 +4,16 @@
 repetitions=1
 
 # Budget name:
-budget=OPEN-19-3
+budget=OPEN-20-21
 
 # Number of nodes:
 nodes=8
 
-# Set of file sizes (default: "1 2 4 8 16 32 64 128 256"):
-fileSizes="1 2 4 8 16 32 64 128 256"
+# Set of file sizes (default: "1 2 4 8 16 32 64 128 256 512 1024 2048 4096"):
+fileSizes="256 512 1024"
 
 # Set of file numbers (default: "1 2 4 8 16 32 64 128 256 512 1024"):
-fileNumbers="1 2 4 8 16 32 64 128 256 512 1024"
+fileNumbers="64 128"
 
 # Path to Fiji:
 pathToFiji="$HOME/Fiji.app/ImageJ-linux64"
@@ -25,7 +25,7 @@ scriptPath="/scratch/work/project/open-19-3/ArtificialDataScripts"
 scriptName="processBoth.py"
 
 # Maximum time to run the job:
-maxTime="01:00:00"
+maxTime="6:00:00"
 
 # Log directory for the .OU and .ER files:
 logDirectory="/scratch/work/project/open-19-3/experiment-org-logs"
@@ -37,10 +37,10 @@ experimentDirectory="/scratch/work/project/open-19-3/experiment-org"
 experimentOutputDirectory="/scratch/work/project/open-19-3/experiment-org-output"
 
 # Nodes per group:
-nodesPerGroup=1 # 1 for Parallel Macro, nodes for OpenMPI Ops and any other number < nodes for combination:
+nodesPerGroup=2 # 1 for Parallel Macro, nodes for OpenMPI Ops and any other number < nodes for combination:
 
-# There is a number of max job limit (+5):
-maxJobs=9
+# There is a number of max job limit:
+maxJobs=20
 
 echo "Big experiment runner started. Press ctr+c to cancel (You have 10 seconds!)"
 echo "Will use $nodes nodes."
@@ -64,14 +64,14 @@ do
 			
 			# Prevent this script from reaching the max job submission limit. OR
 			# Wait for previous repetition to finish.
-			while [[ $(qstat -u $USER | grep $directory)  ]] || [[ $(qstat -u $USER | wc -l) -gt $maxJobs ]];
+			while [[ $(qstat | grep $USER | grep $directory)  ]] || [[ $(qstat | grep $USER | wc -l) -ge $maxJobs ]];
 			do
 				echo "jobs of this combination are running, will try in 5m"
 				sleep 5m
 			done
 
 			# Submit the job using the correct subdirectory:
-			qsub -N $directory -q qexp -o $logDirectory/$directory/ -e $logDirectory/$directory/ -l select=$nodes:ncpus=24:mpiprocs=1:ompthreads=24 -l walltime=$maxTime -v pTF="$pathToFiji",sP="$scriptPath",sN="$scriptName",eD="$experimentDirectory",eOD="$experimentOutputDirectory",d="$directory",fN="$fileNumber",nPG="$nodesPerGroup" ./runCommand.sh
+			qsub -A $budget -q qprod -N $directory -o $logDirectory/$directory/ -e $logDirectory/$directory/ -l select=$nodes:ncpus=24:mpiprocs=1:ompthreads=24 -l walltime=$maxTime -v pTF="$pathToFiji",sP="$scriptPath",sN="$scriptName",eD="$experimentDirectory",eOD="$experimentOutputDirectory",d="$directory",fN="$fileNumber",nPG="$nodesPerGroup" ./runCommand.sh
 
 			# Pace jobs
 			sleep 5s
