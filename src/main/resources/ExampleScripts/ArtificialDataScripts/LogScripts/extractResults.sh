@@ -24,6 +24,9 @@ for d in */ ; do
 
 	# Remove the temporary file with the unsorted data
 	#rm temp_data.dat
+	
+	# Remove lines that do not have two columns:
+    awk 'NF>=2' data.dat > tmp.dat && mv tmp.dat data.dat
 
 	# Calculate the median of each 10 elements
 	input="data.dat"
