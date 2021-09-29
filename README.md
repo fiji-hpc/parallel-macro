@@ -1,4 +1,4 @@
-# Parallel-Macro
+# Parallel Macro
 ## Introduction
 This is a project that enables [Fiji](https://fiji.sc/) users to parallelize their Macro scripts. Fiji is a distribution of ImageJ.
 
