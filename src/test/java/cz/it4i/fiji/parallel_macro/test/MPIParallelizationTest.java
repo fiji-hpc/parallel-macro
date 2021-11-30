@@ -29,18 +29,4 @@ public class MPIParallelizationTest {
 		assertTrue(rank >= 0 && size >= 1);
 	}
 
-	@Test
-	public void scatterShouldWorkWithNumbersStringAndBooleanTest() {
-		int rank = parallelism.getRank();
-		
-		// Numbers:
-		String sendString = "0, 1, 2, 3";
-		String receivedString = parallelism.scatter(sendString, 1, 1, 0);
-		assertTrue((rank+".0").equals(receivedString));
-		
-		// String:
-
-		// Boolean:
-	}
-
 }
