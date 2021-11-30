@@ -26,7 +26,7 @@ public class ParallelMacro {
 				parallelism = new JniMpiParallelism();
 				return;
 			}
-			// By default use the XML progress logging:
+			// By default use the JNA native access:
 			parallelism = new JnaMpiParallelism();
 		}
 	}
