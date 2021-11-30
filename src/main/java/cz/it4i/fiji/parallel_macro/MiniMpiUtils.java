@@ -1,4 +1,5 @@
 // Based on a subset of scijava-parallel-mpi's JavaUtils.
+
 package cz.it4i.fiji.parallel_macro;
 
 import com.sun.jna.*;
@@ -12,7 +13,7 @@ public class MiniMpiUtils {
 	public static Pointer currentComm;
 
 	private static NativeLibrary mpilib;
-	
+
 	static {
 		mpilib = NativeLibrary.getInstance("mpi");
 		Init();

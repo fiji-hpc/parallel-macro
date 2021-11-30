@@ -9,11 +9,6 @@ public class ParallelMacro {
 
 	private static TextReportLogging textReportLogging = new TextReportLogging();
 
-	// This method resets the static state of the class:
-	public static void resetState() {
-		parallelism = new JniMpiParallelism();
-	}
-
 	public static void selectProgressLogger(String type) {
 		if (progressLogging == null) {
 			if (type.equalsIgnoreCase("file")) {
@@ -24,7 +19,7 @@ public class ParallelMacro {
 			progressLogging = new XmlProgressLogging();
 		}
 	}
-	
+
 	public static void selectNativeAccess(String type) {
 		if (parallelism == null) {
 			if (type.equalsIgnoreCase("JNI")) {
@@ -75,7 +70,7 @@ public class ParallelMacro {
 	public static int barrier() {
 		return parallelism.barrier();
 	}
-	
+
 	public static void enableTiming() {
 		selectProgressLogger("");
 		progressLogging.enableTiming();

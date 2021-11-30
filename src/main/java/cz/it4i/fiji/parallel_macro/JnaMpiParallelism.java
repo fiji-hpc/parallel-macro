@@ -1,5 +1,5 @@
-package cz.it4i.fiji.parallel_macro;
 
+package cz.it4i.fiji.parallel_macro;
 
 public class JnaMpiParallelism implements Parallelism {
 
@@ -7,7 +7,7 @@ public class JnaMpiParallelism implements Parallelism {
 		System.out.println("JNA!");
 		new MiniMpiUtils();
 	}
-	
+
 	@Override
 	public int initialise() {
 		// TODO Auto-generated method stub

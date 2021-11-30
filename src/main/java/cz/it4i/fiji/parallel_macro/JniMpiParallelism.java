@@ -22,7 +22,7 @@ public class JniMpiParallelism implements Parallelism {
 		String[] arg0 = { "one", "two" };
 		try {
 			if (!mpiReflection.isInitialised()) {
-				mpiReflection.initialise(arg0);				
+				mpiReflection.initialise(arg0);
 			}
 			return 0;
 		}
@@ -35,7 +35,7 @@ public class JniMpiParallelism implements Parallelism {
 	@Override
 	public int finalise() {
 		try {
-			if(!mpiReflection.isFinalised()) {
+			if (!mpiReflection.isFinalised()) {
 				mpiReflection.finalise();
 			}
 			return 0;
