@@ -3,7 +3,7 @@ package cz.it4i.fiji.parallel_macro;
 
 public class ParallelMacro {
 
-	private static Parallelism parallelism = new MPIParallelism();
+	private static Parallelism parallelism = null;
 
 	private static ProgressLogging progressLogging = null;
 
@@ -11,7 +11,7 @@ public class ParallelMacro {
 
 	// This method resets the static state of the class:
 	public static void resetState() {
-		parallelism = new MPIParallelism();
+		parallelism = new JniMpiParallelism();
 	}
 
 	public static void selectProgressLogger(String type) {
@@ -22,6 +22,17 @@ public class ParallelMacro {
 			}
 			// By default use the XML progress logging:
 			progressLogging = new XmlProgressLogging();
+		}
+	}
+	
+	public static void selectNativeAccess(String type) {
+		if (parallelism == null) {
+			if (type.equalsIgnoreCase("JNI")) {
+				parallelism = new JniMpiParallelism();
+				return;
+			}
+			// By default use the XML progress logging:
+			parallelism = new JnaMpiParallelism();
 		}
 	}
 
@@ -68,32 +79,6 @@ public class ParallelMacro {
 	public static void enableTiming() {
 		selectProgressLogger("");
 		progressLogging.enableTiming();
-	}
-
-	// Simple scatter which attempts to split the send buffer to equal parts among
-	// the nodes:
-	public static String scatterEqually(String sendString,
-		int totalSendBufferLength, int root)
-	{
-		return parallelism.scatterEqually(sendString, totalSendBufferLength, root);
-	}
-
-	public static String scatter(String sendString, int sendCount,
-		int receiveCount, int root)
-	{
-		return parallelism.scatter(sendString, sendCount, receiveCount, root);
-	}
-
-	public static String gather(String sendString, int sendCount,
-		int receiveCount, int root)
-	{
-		return parallelism.gather(sendString, sendCount, receiveCount, root);
-	}
-
-	public static String gatherEqually(String sendString,
-		int totalSendBufferLength, int root)
-	{
-		return parallelism.gatherEqually(sendString, totalSendBufferLength, root);
 	}
 
 	private ParallelMacro() {
