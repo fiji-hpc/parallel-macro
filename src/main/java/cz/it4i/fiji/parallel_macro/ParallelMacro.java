@@ -47,33 +47,39 @@ public class ParallelMacro {
 			.getRank());
 	}
 
+	
+	public static void enableTiming() {
+		selectProgressLogger("");
+		progressLogging.enableTiming();
+	}
+	
 	public static int reportText(String textToReport) {
 		return textReportLogging.reportText(textToReport, parallelism.getRank());
 	}
 
 	public static int initialise() {
+		selectNativeAccess("");
 		return parallelism.initialise();
 	}
 
 	public static int finalise() {
+		selectNativeAccess("");
 		return parallelism.finalise();
 	}
 
 	public static int getRank() {
+		selectNativeAccess("");
 		return parallelism.getRank();
 	}
 
 	public static int getSize() {
+		selectNativeAccess("");
 		return parallelism.getSize();
 	}
 
 	public static int barrier() {
+		selectNativeAccess("");
 		return parallelism.barrier();
-	}
-
-	public static void enableTiming() {
-		selectProgressLogger("");
-		progressLogging.enableTiming();
 	}
 
 	private ParallelMacro() {

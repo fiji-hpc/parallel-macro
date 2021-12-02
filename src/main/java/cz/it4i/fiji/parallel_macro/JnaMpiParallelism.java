@@ -5,12 +5,11 @@ public class JnaMpiParallelism implements Parallelism {
 
 	static {
 		System.out.println("JNA!");
-		new MiniMpiUtils();
 	}
 
 	@Override
 	public int initialise() {
-		// TODO Auto-generated method stub
+		MiniMpiUtils.Init();
 		return 0;
 	}
 

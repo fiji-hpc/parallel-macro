@@ -16,8 +16,6 @@ public class MiniMpiUtils {
 
 	static {
 		mpilib = NativeLibrary.getInstance("mpi");
-		Init();
-		Runtime.getRuntime().addShutdownHook(new Thread(MiniMpiUtils::Finalize));
 	}
 
 	private static void checkMpiResult(int ret) {
@@ -26,7 +24,7 @@ public class MiniMpiUtils {
 		}
 	}
 
-	private static void Init() {
+	public static void Init() {
 		int[] isInitialized = new int[1];
 		checkMpiResult(MPILibrary.INSTANCE.MPI_Initialized(isInitialized));
 		if (isInitialized[0] == 0) {
