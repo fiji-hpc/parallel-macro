@@ -7,12 +7,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import cz.it4i.fiji.parallel_macro.JniMpiParallelism;
+import cz.it4i.fiji.parallel_macro.JnaMpiParallelism;
 import cz.it4i.fiji.parallel_macro.Parallelism;
 
 public class MPIParallelizationTest {
 
-	private static Parallelism parallelism = new JniMpiParallelism();
+	private static Parallelism parallelism = new JnaMpiParallelism();
 
 	@BeforeClass
 	public static void initializeMPI() {

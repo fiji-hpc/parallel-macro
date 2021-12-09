@@ -3,7 +3,7 @@ package cz.it4i.fiji.parallel_macro;
 
 public class ParallelMacro {
 
-	private static Parallelism parallelism = null;
+	private static Parallelism parallelism = new JnaMpiParallelism();
 
 	private static ProgressLogging progressLogging = null;
 
@@ -17,17 +17,6 @@ public class ParallelMacro {
 			}
 			// By default use the XML progress logging:
 			progressLogging = new XmlProgressLogging();
-		}
-	}
-
-	public static void selectNativeAccess(String type) {
-		if (parallelism == null) {
-			if (type.equalsIgnoreCase("JNI")) {
-				parallelism = new JniMpiParallelism();
-				return;
-			}
-			// By default use the JNA native access:
-			parallelism = new JnaMpiParallelism();
 		}
 	}
 
@@ -47,38 +36,32 @@ public class ParallelMacro {
 			.getRank());
 	}
 
-	
 	public static void enableTiming() {
 		selectProgressLogger("");
 		progressLogging.enableTiming();
 	}
-	
+
 	public static int reportText(String textToReport) {
 		return textReportLogging.reportText(textToReport, parallelism.getRank());
 	}
 
 	public static int initialise() {
-		selectNativeAccess("");
 		return parallelism.initialise();
 	}
 
 	public static int finalise() {
-		selectNativeAccess("");
 		return parallelism.finalise();
 	}
 
 	public static int getRank() {
-		selectNativeAccess("");
 		return parallelism.getRank();
 	}
 
 	public static int getSize() {
-		selectNativeAccess("");
 		return parallelism.getSize();
 	}
 
 	public static int barrier() {
-		selectNativeAccess("");
 		return parallelism.barrier();
 	}
 
