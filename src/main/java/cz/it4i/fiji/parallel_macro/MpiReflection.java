@@ -14,12 +14,10 @@ import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MpiReflection {
-
-	Logger logger = LoggerFactory.getLogger(MpiReflection.class);
 
 	private Method mpiInit;
 	private Method mpiIsInitialized;
@@ -53,12 +51,12 @@ public class MpiReflection {
 			script = bld.toString();
 		}
 		catch (IOException exception) {
-			logger.error("Could not read script in resources! \n {} ", exception
+			log.error("Could not read script in resources! \n {} ", exception
 				.getMessage());
 		}
 		script += '\n' + ")";
 
-		logger.debug("Loaded the script:\n {} ", script);
+		log.debug("Loaded the script:\n {} ", script);
 
 		try {
 			// Execute the script:
@@ -70,18 +68,18 @@ public class MpiReflection {
 				.getInputStream()));
 			List<String> files = new ArrayList<>();
 			String line = "";
-			logger.debug("Standard output of the find mpi.jar script.");
+			log.debug("Standard output of the find mpi.jar script.");
 			while ((line = output.readLine()) != null) {
 				files.add(line);
-				logger.debug("{} \n", line);
+				log.debug("{} \n", line);
 			}
 
 			// Read the error of the script:
-			logger.debug("Error output of the find mpi.jar script.");
+			log.debug("Error output of the find mpi.jar script.");
 			BufferedReader error = new BufferedReader(new InputStreamReader(p
 				.getErrorStream()));
 			while ((line = error.readLine()) != null) {
-				logger.debug("{} \n", line);
+				log.debug("{} \n", line);
 			}
 
 			// Dynamically link the files.
@@ -89,13 +87,13 @@ public class MpiReflection {
 				jarPath = files.get(0);
 			}
 			else {
-				logger.error("No OpenMPI was found on your system." +
+				log.error("No OpenMPI was found on your system." +
 					" Please install OpenMPI before using Parallel-Macro.");
 				System.exit(0);
 			}
 		}
 		catch (IOException exc) {
-			logger.error("OpenMPI's mpi.jar was not found on this system. \n {}", exc
+			log.error("OpenMPI's mpi.jar was not found on this system. \n {}", exc
 				.getMessage());
 			System.exit(0);
 		}
@@ -104,7 +102,7 @@ public class MpiReflection {
 	}
 
 	public void loadOpenMpi(String path) {
-		logger.info("The path of MPI.jar is: {}", path);
+		log.info("The path of MPI.jar is: {}", path);
 		try {
 			URLClassLoader child;
 			child = new URLClassLoader(new URL[] { new URL("file://" + path) },

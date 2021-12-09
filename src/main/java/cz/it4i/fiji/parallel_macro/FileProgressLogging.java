@@ -11,14 +11,12 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FileProgressLogging extends ProgressLoggingRestrictions implements
 	ProgressLogging
 {
-
-	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class);
 
 	private Map<Integer, String> tasks = new HashMap<>();
 
@@ -74,7 +72,7 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 
 		}
 		catch (IOException exc) {
-			logger.error(" Error occurred during reporting tasks: {} ", exc
+			log.error(" Error occurred during reporting tasks: {} ", exc
 				.getMessage());
 		}
 
@@ -122,7 +120,7 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 			updateLastUpdatedTimestamp(rank); // Note the time-stamp of the update
 		}
 		catch (IOException exc) {
-			logger.error(" Error occurred during report progress error: {} ", exc
+			log.error(" Error occurred during report progress error: {} ", exc
 				.getMessage());
 			return -1;
 		}
@@ -139,8 +137,8 @@ public class FileProgressLogging extends ProgressLoggingRestrictions implements
 				System.lineSeparator()));
 		}
 		catch (IOException exc) {
-			logger.error("Error occurred while updating last updated timestamp: {} ",
-				exc.getMessage());
+			log.error("Error occurred while updating last updated timestamp: {} ", exc
+				.getMessage());
 		}
 
 	}

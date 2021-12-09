@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TextReportLogging {
-
-	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class);
 
 	private static final String LOG_FILE_REPORT_PREFIX = "report_";
 	private static final String LOG_FILE_REPORT_POSTFIX = ".tlog";
@@ -23,7 +21,7 @@ public class TextReportLogging {
 					.getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 		}
 		catch (IOException exc) {
-			logger.error("Report text error: {} ", exc.getMessage());
+			log.error("Report text error: {} ", exc.getMessage());
 			return -1;
 		}
 		return 0;

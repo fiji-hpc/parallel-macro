@@ -3,10 +3,6 @@ package cz.it4i.fiji.parallel_macro;
 
 public class JnaMpiParallelism implements Parallelism {
 
-	static {
-		System.out.println("JNA!");
-	}
-
 	@Override
 	public int initialise() {
 		MiniMpiUtils.Init();

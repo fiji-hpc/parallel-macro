@@ -1,9 +1,9 @@
 
 package cz.it4i.fiji.parallel_macro;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class JniMpiParallelism implements Parallelism {
 
 	private static MpiReflection mpiReflection;
@@ -15,8 +15,6 @@ public class JniMpiParallelism implements Parallelism {
 		mpiReflection.loadOpenMpi(path);
 	}
 
-	Logger logger = LoggerFactory.getLogger(JniMpiParallelism.class);
-
 	@Override
 	public int initialise() {
 		String[] arg0 = { "one", "two" };
@@ -27,7 +25,7 @@ public class JniMpiParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.error("MPI initialization error: {} ", exc.getMessage());
+			log.error("MPI initialization error: {} ", exc.getMessage());
 			return -1;
 		}
 	}
@@ -41,7 +39,7 @@ public class JniMpiParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.error("MPI finalization error: {} ", exc.getMessage());
+			log.error("MPI finalization error: {} ", exc.getMessage());
 		}
 		return -1;
 	}
@@ -53,7 +51,7 @@ public class JniMpiParallelism implements Parallelism {
 			rank = mpiReflection.getRank();
 		}
 		catch (Exception exc) {
-			logger.error("MPI get rank error: {} ", exc.getMessage());
+			log.error("MPI get rank error: {} ", exc.getMessage());
 		}
 		return rank;
 	}
@@ -65,7 +63,7 @@ public class JniMpiParallelism implements Parallelism {
 			size = mpiReflection.getSize();
 		}
 		catch (Exception exc) {
-			logger.error("MPI get size error: {} ", exc.getMessage());
+			log.error("MPI get size error: {} ", exc.getMessage());
 		}
 		return size;
 	}
@@ -77,7 +75,7 @@ public class JniMpiParallelism implements Parallelism {
 			return 0;
 		}
 		catch (Exception exc) {
-			logger.error("MPI barrier error: {} ", exc.getMessage());
+			log.error("MPI barrier error: {} ", exc.getMessage());
 		}
 		return -1;
 	}

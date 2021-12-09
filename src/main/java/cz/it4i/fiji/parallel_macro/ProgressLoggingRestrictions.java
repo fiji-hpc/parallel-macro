@@ -3,18 +3,15 @@ package cz.it4i.fiji.parallel_macro;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ProgressLoggingRestrictions {
-
-	private Logger logger = LoggerFactory.getLogger(ParallelMacro.class
-		.getName());
 
 	protected boolean followsAddTaskRestrictions(boolean tasksWereReported) {
 		// No new tasks should be added after they were reported:
 		if (tasksWereReported) {
-			logger.info(
+			log.info(
 				"addTask call was ignored - No new tasks should be added after they were reported.");
 			return false;
 		}
@@ -25,8 +22,7 @@ public class ProgressLoggingRestrictions {
 		boolean tasksWereReported)
 	{
 		if (tasks.isEmpty()) {
-			logger.info(
-				"reportTasks call was ignored, there are no tasks to report.");
+			log.info("reportTasks call was ignored, there are no tasks to report.");
 			return false;
 		}
 
@@ -39,7 +35,7 @@ public class ProgressLoggingRestrictions {
 	{
 		// Check that task exists:
 		if (!tasks.containsKey(taskId)) {
-			logger.info(
+			log.info(
 				"Task {} does not exist. Progress can not be reported for a task that does not exist.",
 				taskId);
 			return false;
