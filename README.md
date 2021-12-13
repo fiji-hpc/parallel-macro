@@ -2,32 +2,32 @@
 ## Introduction
 This is a project that enables [Fiji](https://fiji.sc/) users to parallelize their Macro scripts. Fiji is a distribution of ImageJ.
 
-This project must be used along with HPC Workflow Manager that provides a GUI which can be found [here](https://github.com/kozusznik/hpc-workflow-manager-full/tree/paradigmOverSSH) along with installation instructions for it.
+This project must be used along with HPC Workflow Manager that provides a GUI which can be found [here](https://github.com/fiji-hpc/hpc-workflow-manager-full) along with installation instructions for it.
 
-## Build 
-Use maven with package target to build a jar of this project.
-
-## Install
-Before installing this package you must:
+## Build and Install
+#### Prerequisites
+Before building and installing this package you must:
 * Have access to an HPC cluster.
-* Make sure that OpenMPI is installed (or available as a module) with the Java bindings configured on the cluster.
+* Make sure that Open MPI is installed (or available as a module) on the cluster.
+* Although you can compile Parallel Macro locally, it is best to do so on the remote cluster. In this case make sure that Java 8 and Maven are also installed (or available as a module) on the remote cluster.
 
-###  Follow these steps to install:
-* Upload the package (jar) file of the project that you build to the cluster.
-* Download the latest Linux version of Fiji from the [official site](https://fiji.sc/) on your target system (if it is not already installed). You can use the wget program that is included in most UNIX-like systems to download Fiji on the cluster.
-* Extract the downloaded archive of Fiji on a directory in which you have all access rights. Fiji is now installed.
-* Copy the project's package (jar) file in Fiji's "plugins" or "jars" directory (any one of the two directories will do, there is no need to copy to both directories). The plugin is now installed.
+#### Installation Steps
+* Download the official Linux version of Fiji on the remote cluster using `wget`:
+  * `wget https://downloads.imagej.net/fiji/latest/fiji-linux64.zip`
 
-It should now be ready to be used with HPC Workflow Manager.
+* Extract the downloaded archive of Fiji on a directory in which you have all access rights. Fiji is now installed.:
+  * `unzip fiji-linux64.zip`
 
-### Troubleshooting:
-Make sure that the directory mpi.jar is in the $LD\_LIBRARY\_PATH of the target system.
-Parallel-Macro will find the mpi.jar automatically in the directories listed in the environment variable.
-It will also try to "ml" or "module load" the OpenMPI 4.0 module before looking in the environment variable.
+* Load the Maven and Java modules on your cluster. The names of the modules may be different on your machine.
+  * `module load Maven/3.3.9`
+  * `module load Java/1.8.0_202`
+* Clone this repository:
+  * `git clone https://github.com/fiji-hpc/parallel-macro.git `
 
-You will need to repeat the instructions for every target system.
+* Run the following script which will build and install Parallel Macro in the Fiji located in your remote cluster home directory:
+  * `bash build.sh`
 
-If you need to manually add the path of mpi.jar in $LD\_LIBRARY\_PATH it is located in OpenMPI's lib directory.
+> :information_source: If you are not using your home directory for the installation, you have to provide the full path of Fiji to the build script. For example, `bash build.sh /mnt/shared/Fiji.app`.
 
-For example, this plugin was tested on the Salomon supercomputer.
-The mpi.jar on Salomon is located at /apps/all/OpenMPI/4.0.0-GCC-6.3.0-2.27/lib
+Parallel Macro should now be ready to be used with HPC Workflow Manager.
+
