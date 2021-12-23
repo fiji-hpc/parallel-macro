@@ -54,7 +54,6 @@ from net.imglib2.type.numeric.real import DoubleType
 from net.imglib2.view import Views
 
 # This works only in UNIX-like systems that support Fiji.
-ParallelMacro.initialise()
 
 # This is needed in order to use the split method.
 from cz.it4i.scijava.mpi import MPIUtils
@@ -158,5 +157,3 @@ ParallelMacro.barrier()
 if myRank == 0:
 	print("Total execution time: "+str(time.time() - startTime)+" seconds for "+str(size)+" nodes.")
 print("Rank "+str(myRank)+" finished.")
-
-ParallelMacro.finalise()

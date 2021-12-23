@@ -51,68 +51,63 @@ function processFile(path) {
 // Main
 print("Running MPI macro");
 
-// Start the parallelization:
-parInit();
-	// Add all tasks:
-	printTask = parAddTask("Print your rank and MPI world size.");
-	countFilesTask = parAddTask("Count files.");
-	processFilesTask = parAddTask("Process files task.");
-	printCountedFilesTask = parAddTask("Print number of files counted.");
+// Add all tasks:
+printTask = parAddTask("Print your rank and MPI world size.");
+countFilesTask = parAddTask("Count files.");
+processFilesTask = parAddTask("Process files task.");
+printCountedFilesTask = parAddTask("Print number of files counted.");
 
-	// Report all tasks:
-	parReportTasks();
+// Report all tasks:
+parReportTasks();
 
-	// Report that the first task started:
-	parReportProgress(printTask, 0);
-	
-	// Get the rank and size of the node:
-	rank = parGetRank();
-	size = parGetSize();
+// Report that the first task started:
+parReportProgress(printTask, 0);
 
-	message = "My rank = " + rank + ", MPI world size = " + size;
-	print(message);
-	parReportText(message);
+// Get the rank and size of the node:
+rank = parGetRank();
+size = parGetSize();
 
-	// Report that first task is completed:
-	parReportProgress(printTask, 100);
+message = "My rank = " + rank + ", MPI world size = " + size;
+print(message);
+parReportText(message);
 
-	// Sychronization of all the nodes:
-	parBarrier();
+// Report that first task is completed:
+parReportProgress(printTask, 100);
 
-	// Report that the second task started:
-	parReportProgress(countFilesTask, 0);
-	
-	// Count files:
-	count = 0;
-	processed = 0;
-	path = "~/test_data/"
-	countFiles(path);
-	print("count = " + count + "\n");
+// Sychronization of all the nodes:
+parBarrier();
 
-	// Report that the second task is completed:
-	parReportProgress(countFilesTask, 100);
+// Report that the second task started:
+parReportProgress(countFilesTask, 0);
 
-	// Another synchronization:
-	parBarrier();
+// Count files:
+count = 0;
+processed = 0;
+path = "~/test_data/"
+countFiles(path);
+print("count = " + count + "\n");
 
-	// Report that the third task started:
-	parReportProgress(processFilesTask, 0);
-	
-	processFiles(path);
-	
-	// Report that the third task is completed:
-	parReportProgress(processFilesTask, 100);
+// Report that the second task is completed:
+parReportProgress(countFilesTask, 100);
 
-	// Another synchronization:
-	parBarrier();
+// Another synchronization:
+parBarrier();
 
-	// Report that the last task started:
-	parReportProgress(printCountedFilesTask, 0);
-	
-	print("#" + rank + " node - " +processed+" files processed\n");
-	
-	// Report that the third task is completed:
-	parReportProgress(printCountedFilesTask, 100);
+// Report that the third task started:
+parReportProgress(processFilesTask, 0);
 
-// End the parallelization:
-parFinalize();
+processFiles(path);
+
+// Report that the third task is completed:
+parReportProgress(processFilesTask, 100);
+
+// Another synchronization:
+parBarrier();
+
+// Report that the last task started:
+parReportProgress(printCountedFilesTask, 0);
+
+print("#" + rank + " node - " +processed+" files processed\n");
+
+// Report that the third task is completed:
+parReportProgress(printCountedFilesTask, 100);

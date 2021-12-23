@@ -43,92 +43,89 @@ function calculateInterval(size, chunk, start, end){
 }
 
 // This works only in UNIX-like systems that support Fiji.
-parInit();
-	// Start the timer:
-	startTime = getTime();
-	
-	// Define the tasks:
-	preprocessingTask = parAddTask("Preprocessing");
-	parReportTasks();
+// Start the timer:
+startTime = getTime();
 
-	// Get the rank of the node and number of nodes available:
-	myRank = parGetRank();
-	size = parGetSize();
-	
-	// Input and output folders on the cluster:
-	inputFolder = "/scratch/work/project/open-19-3/experiment/input/";
-	outputFolder = "/scratch/work/project/open-19-3/experiment/output/";
-	
-	// File prefix and postfix
-	prefix = "fused_tp_0_ch_";
-	postfix = ".tif";
-	
-	// Number of files
-	files = 1056;
+// Define the tasks:
+preprocessingTask = parAddTask("Preprocessing");
+parReportTasks();
 
-	// Batch mode on
-	setBatchMode(true);
+// Get the rank of the node and number of nodes available:
+myRank = parGetRank();
+size = parGetSize();
 
-	print("Rank "+myRank+" started");
+// Input and output folders on the cluster:
+inputFolder = "/scratch/work/project/open-19-3/experiment/input/";
+outputFolder = "/scratch/work/project/open-19-3/experiment/output/";
 
-	// Also save the output in a directory by 
-	// size (total number of nodes):
-	outputFolder += ""+size+"/";
-	exec("mkdir -p "+outputFolder);
-	exec("chmod -R 777 "+outputFolder);
+// File prefix and postfix
+prefix = "fused_tp_0_ch_";
+postfix = ".tif";
 
-	print("My rank: "+myRank+" and size: "+size);
+// Number of files
+files = 1056;
 
-	// Split the workload (the number of files) into evenly 
-	// distributed parts for each compute node if possible.
+// Batch mode on
+setBatchMode(true);
+
+print("Rank "+myRank+" started");
+
+// Also save the output in a directory by 
+// size (total number of nodes):
+outputFolder += ""+size+"/";
+exec("mkdir -p "+outputFolder);
+exec("chmod -R 777 "+outputFolder);
+
+print("My rank: "+myRank+" and size: "+size);
+
+// Split the workload (the number of files) into evenly 
+// distributed parts for each compute node if possible.
+
+// Deal the workload iterations evenly:
+chunk = calculateChunkSize(size, files);
+
+// Create the iteration start and end for each node:	
+start = newArray(size);
+end = newArray(size);
+calculateInterval(size, chunk, start, end);
+
+print("Rank: "+myRank+" size: "+size+" start: "+start[myRank]+" end: "+end[myRank]+" part size: "+chunk[myRank]);
+
+
+progress = 0;
+parReportProgress(preprocessingTask, progress);
+for (i=start[myRank]; i < end[myRank]; i++) {
+	startImageTime = getTime();
 	
-	// Deal the workload iterations evenly:
-	chunk = calculateChunkSize(size, files);
+	// Open the file
+	fileName = prefix+formatNumber(i)+postfix;
+	open(inputFolder+"/"+fileName);
+		
+	// Enhance contrast
+	run("Enhance Contrast...", "saturated=0.3");
+	// Gaussian blur
+	run("Gaussian Blur...", "sigma=2");
+	// Edge detection
+	run("Find Edges");
 	
-	// Create the iteration start and end for each node:	
-	start = newArray(size);
-	end = newArray(size);
-	calculateInterval(size, chunk, start, end);
+	// Save the processed file:
+	saveAs("Tiff", outputFolder + fileName); 
+	
+	print("Image "+(i+1)+" time: "+(getTime() - startImageTime)/1000+" seconds");
 
-	print("Rank: "+myRank+" size: "+size+" start: "+start[myRank]+" end: "+end[myRank]+" part size: "+chunk[myRank]);
+	progress += 1;
+	parReportProgress(preprocessingTask,progress/chunk[myRank]*100);
+}
+parReportProgress(preprocessingTask, 100);
 
-	
-	progress = 0;
-	parReportProgress(preprocessingTask, progress);
-	for (i=start[myRank]; i < end[myRank]; i++) {
-		startImageTime = getTime();
-		
-		// Open the file
-		fileName = prefix+formatNumber(i)+postfix;
-		open(inputFolder+"/"+fileName);
-				
-		// Enhance contrast
-		run("Enhance Contrast...", "saturated=0.3");
-		// Gaussian blur
-		run("Gaussian Blur...", "sigma=2");
-		// Edge detection
-		run("Find Edges");
-		
-		// Save the processed file:
-		saveAs("Tiff", outputFolder + fileName); 
-		
-		print("Image "+(i+1)+" time: "+(getTime() - startImageTime)/1000+" seconds");
+print("Rank: "+myRank+" total time before the barrier: "+(getTime() - startTime)/1000+" seconds.");
 
-		progress += 1;
-		parReportProgress(preprocessingTask,progress/chunk[myRank]*100);
-	}
-	parReportProgress(preprocessingTask, 100);
-	
-	print("Rank: "+myRank+" total time before the barrier: "+(getTime() - startTime)/1000+" seconds.");
-	
-	parBarrier();
-	
-	if(myRank == 0){
-		print("Total execution time: "+(getTime() - startTime)/1000+" seconds for "+size+" nodes.");
-	}
-	print("Rank "+myRank+" finished.");
-	
-	// Exit batch mode
-	setBatchMode(false);
+parBarrier();
 
-parFinalize();
+if(myRank == 0){
+	print("Total execution time: "+(getTime() - startTime)/1000+" seconds for "+size+" nodes.");
+}
+print("Rank "+myRank+" finished.");
+
+// Exit batch mode
+setBatchMode(false);

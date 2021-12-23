@@ -39,7 +39,6 @@ from java.lang import Runtime
 from ij import IJ
 
 # This works only in UNIX-like systems that support Fiji.
-ParallelMacro.initialise()
 # Start the timer:
 startTime = time.time()
 
@@ -118,5 +117,3 @@ ParallelMacro.barrier()
 if myRank == 0:
     print("Total execution time: "+str(time.time() - startTime)+" seconds for "+str(size)+" nodes.")
 print("Rank "+str(myRank)+" finished.")
-
-ParallelMacro.finalise()

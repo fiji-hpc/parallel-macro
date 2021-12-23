@@ -45,14 +45,6 @@ public class ParallelMacro {
 		return textReportLogging.reportText(textToReport, parallelism.getRank());
 	}
 
-	public static int initialise() {
-		return parallelism.initialise();
-	}
-
-	public static int finalise() {
-		return parallelism.finalise();
-	}
-
 	public static int getRank() {
 		return parallelism.getRank();
 	}
