@@ -27,7 +27,7 @@ parAddTask("Message overlay generation.");
 parAddTask("Flatten message overlays.");
 parAddTask("Add noise multiple times.");
 parAddTask("Draw random lines.");
-parAddTask("Gaussian Blur.");
+//parAddTask("Gaussian Blur.");
 parReportTasks();
 
 
@@ -104,9 +104,9 @@ for (i = 0; i < numberOfLines; i++) {
 }
 parReportProgress(3, 100);
 
-parReportProgress(4, 0);
-run("Gaussian Blur...", "sigma=1");
-parReportProgress(4,100);
+//parReportProgress(4, 0);
+//run("Gaussian Blur...", "sigma=1");
+//parReportProgress(4,100);
 
 exec("mkdir output");
 exec("chmod -R 777 output");
