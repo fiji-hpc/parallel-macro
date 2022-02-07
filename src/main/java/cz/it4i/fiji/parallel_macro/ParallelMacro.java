@@ -11,8 +11,8 @@ public class ParallelMacro {
 
 	public static void selectProgressLogger(String type) {
 		if (progressLogging == null) {
-			if (type.equalsIgnoreCase("file")) {
-				progressLogging = new FileProgressLogging();
+			if (type.equalsIgnoreCase("csv")) {
+				progressLogging = new CsvProgressLogging();
 				return;
 			}
 			// By default use the XML progress logging:

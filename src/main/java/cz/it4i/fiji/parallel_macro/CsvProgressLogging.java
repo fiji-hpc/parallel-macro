@@ -14,7 +14,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class FileProgressLogging extends ProgressLoggingRestrictions implements
+public class CsvProgressLogging extends ProgressLoggingRestrictions implements
 	ProgressLogging
 {
 
