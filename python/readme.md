@@ -19,7 +19,7 @@ python -m pip install mpi4py
 mpiexec -n 3 python3 /mnt/shared/helloworld.py
 ```
 
-Where the file referenced in the last line is a small example to test that the installation was successful and has the following content:
+Where the file referenced in the last line (path `/mnt/shared/python/helloworld.py`) is a small example to test that the installation was successful and has the following content:
 
 ```python
 from mpi4py import MPI
