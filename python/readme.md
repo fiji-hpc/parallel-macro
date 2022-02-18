@@ -66,8 +66,7 @@ From the main menu of Fiji the click on `Plugins` > `HPC-ParallelTools` > `Parad
 
 Create or edit a paradigm profile of type `HPCWorkflowJobManager` and manager `SSH` as described in the [short guide](https://github.com/fiji-hpc/parallel-macro/wiki/How-to-set-up-the-paradigm-for-Parallel-Macro) but make the following changes:
 
-* In the text field `Remote directory with Fiji` input the the text `python3 /mnt/shared/python/helloworld.py ` 
-
+* In the text field `Remote directory with Fiji` input the the text `python3 /mnt/shared/python/helloworld.py ` make sure it ends in a whitespace. 
 * Uncheck `Automatic detection` checkbox. 
 * Click `Advance settings` link.
   * In the field `Job Scheduler`, set the scheduler of your remote cluster.
