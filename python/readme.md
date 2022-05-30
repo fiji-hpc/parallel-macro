@@ -7,8 +7,9 @@ This is a simple implementation of the parallel logger (both CSV and XML) of Par
 The easiest way to parallelize python programs in a cluster is to use an implementation of the Message Passing Interface (MPI) standard. To do this with python you can use the [mpi4py](https://mpi4py.github.io/) package (MPI for Python) which provides bindings for MPI implementations such as [Open MPI](https://www.open-mpi.org/). 
 
 ## Installation
+> :information_source: For this example, we use the [virtual Ubuntu cluster](https://github.com/fiji-hpc/parallel-macro/wiki/Building-Your-Own-Cluster-and-Configuring-It). You must adapt these instructions according to the cluster you are using.
 
-You must have Open MPI installed on your cluster. If it is possible to install packages on your cluster you can first install mpi4py in order to use multi-node parallelism provided by MPI in python like so:
+You must have Open MPI installed on your cluster. If it is possible to install packages on your cluster you can first install mpi4py in order to use multi-node parallelism provided by MPI in python, like so:
 
 ```bash
 
