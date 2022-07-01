@@ -72,6 +72,6 @@ Create or edit a paradigm profile of type `HPCWorkflowJobManager` and manager `S
 * Click `Advance settings` link.
   * In the field `Job Scheduler`, set the scheduler of your remote cluster.
   * Set `Remote ImageJ command` to an empty space `  `.
-  * Set the name of the Open MPI of your cluster that you are going to use.
+  * Set the name of the Open MPI Environmanet Module of your cluster that you are going to use.
 * Finally when creating a job select an empty Jython script in a new directory.
 * Run the job.
