@@ -17,6 +17,12 @@ public class MiniMpiUtils {
 	static {
 		mpilib = NativeLibrary.getInstance("mpi");
 		Init();
+
+		if (getRank() == 0) {
+			System.out.println("Processors (in Java): " + Runtime.getRuntime()
+				.availableProcessors());
+		}
+
 		Runtime.getRuntime().addShutdownHook(new Thread(MiniMpiUtils::Finalize));
 	}
 
