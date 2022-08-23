@@ -14,8 +14,7 @@ public class JnaMpiParallelism implements Parallelism {
 	}
 
 	@Override
-	public int barrier() {
+	public void barrier() {
 		MiniMpiUtils.barrier();
-		return 0;
 	}
 }

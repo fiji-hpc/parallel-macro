@@ -7,5 +7,5 @@ public interface Parallelism {
 
 	public int getSize();
 
-	public int barrier();
+	public void barrier();
 }

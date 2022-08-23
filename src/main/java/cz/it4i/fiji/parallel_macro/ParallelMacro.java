@@ -53,8 +53,8 @@ public class ParallelMacro {
 		return parallelism.getSize();
 	}
 
-	public static int barrier() {
-		return parallelism.barrier();
+	public static void barrier() {
+		parallelism.barrier();
 	}
 
 	private ParallelMacro() {
