@@ -9,8 +9,10 @@ import java.lang.reflect.Field;
 
 public class MiniMpiUtils {
 
-	public static Pointer MPI_COMM_WORLD;
-	public static Pointer currentComm;
+	private static Pointer MPI_COMM_WORLD;
+	private static Pointer currentComm;
+
+	private static Pointer MPI_THREAD_MULTIPLE;
 
 	private static NativeLibrary mpilib;
 
@@ -36,7 +38,9 @@ public class MiniMpiUtils {
 		int[] isInitialized = new int[1];
 		checkMpiResult(MPILibrary.INSTANCE.MPI_Initialized(isInitialized));
 		if (isInitialized[0] == 0) {
-			checkMpiResult(MPILibrary.INSTANCE.MPI_Init(null, null));
+			int[] provided = new int[1];
+			checkMpiResult(MPILibrary.INSTANCE.MPI_Init_thread(null, null,
+				MPI_THREAD_MULTIPLE, provided));
 		}
 		for (Field f : MiniMpiUtils.class.getDeclaredFields()) {
 			if (!f.getName().startsWith("MPI_")) {
@@ -89,7 +93,8 @@ public class MiniMpiUtils {
 
 		int MPI_Finalized(int[] flag);
 
-		int MPI_Init(Pointer argv, Pointer argc);
+		int MPI_Init_thread(Pointer argv, Pointer argc, Pointer required,
+			int[] provided);
 
 		int MPI_Finalize();
 
