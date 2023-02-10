@@ -2,16 +2,32 @@
 ## Introduction
 This is a project that enables [Fiji](https://fiji.sc/) users to parallelize their Macro scripts. Fiji is a distribution of ImageJ.
 
-This project must be used along with HPC Workflow Manager that provides a GUI. Follow [these instructions](https://github.com/fiji-hpc/parallel-macro/wiki/How-to-install-HPC-Workflow-Manager-client) to install it from a Fiji update site. The source code can be found [here](https://github.com/fiji-hpc/hpc-workflow-manager-full) along with **manual** installation instructions for it. 
+This project must be used along with HPC Workflow Manager that provides a GUI. The links to it are given below.
+<br/>
+**Fasttrack**:
+Follow [these instructions](https://github.com/fiji-hpc/parallel-macro/wiki/How-to-install-HPC-Workflow-Manager-client) to install it from a Fiji update site.
 
-## Build and Install
-#### Prerequisites
+## Important links
+- [__The Short Guide on how to install and use the project HPC Workflow Manager__](https://github.com/fiji-hpc/parallel-macro/wiki/Short-Guide)
+- [The official web page about this whole project](https://fiji-hpc.github.io/hpc-parallel-tools/)
+- [Wiki page of the project](https://imagej.net/HPC_Workflow_Manager) on [imagej.net](https://imagej.net/)
+- [The source code](https://github.com/fiji-hpc/hpc-workflow-manager-full) along with **manual** installation instructions for it. 
+
+## Reporting issues
+I'm sure issues will come across :( <br/>
+[Please, tell us here.](https://github.com/fiji-hpc/parallel-macro/issues)
+
+<br/>
+<br/>
+
+# Building and Installing
+## Prerequisites
 Before building and installing this package you must:
 * Have access to an HPC cluster.
 * Make sure that Open MPI is installed (or available as a module) on the cluster.
 * Although you can compile Parallel Macro locally, it is best to do so on the remote cluster. In this case make sure that Java 8 and Maven are also installed (or available as a module) on the remote cluster.
 
-#### Installation Steps
+## Installation Steps
 * Download the official Linux version of Fiji on the remote cluster using `wget`:
   * `wget https://downloads.imagej.net/fiji/latest/fiji-linux64.zip`
 
