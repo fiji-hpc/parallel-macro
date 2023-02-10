@@ -2,6 +2,8 @@
 ## Introduction
 This is a project that enables [Fiji](https://fiji.sc/) users to parallelize their Macro scripts. Fiji is a distribution of ImageJ.
 
+It is a sibbling project to the [OpenMPI Ops](https://github.com/fiji-hpc/scijava-parallel-mpi).
+
 This project must be used along with HPC Workflow Manager that provides a GUI. The links to it are given below.
 <br/>
 **Fasttrack**:
