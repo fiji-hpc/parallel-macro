@@ -160,8 +160,18 @@ mpi_rank = os.environ["OMPI_COMM_WORLD_RANK"]
 ```
 
 Speaking of API, there's also an API-way of doing it using [MPI-Python binding
-from the `mpi4py`](https://mpi4py.readthedocs.io/en/stable/install.html)
-(...btw: `conda install mpi4py`). Check the file `sbatch_2_worker_PYTHON2.py` to find:
+from the `mpi4py`](https://mpi4py.readthedocs.io/en/stable/install.html).
+
+> btw:
+>
+> ```bash
+> module add OpenMPI
+> source /home/xulman/miniconda3/start_conda_env.cmd
+> conda activate ctc-with-mpi4py_v2
+> pip install mpi4py
+> ```
+
+Check the file `sbatch_2_worker_PYTHON2.py` to find:
 
 ```python
 from mpi4py import MPI
