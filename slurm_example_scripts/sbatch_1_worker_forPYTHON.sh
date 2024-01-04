@@ -2,7 +2,7 @@
 
 # crank up some additional pythonic env
 source /home/xulman/miniconda3/start_conda_env.cmd
-conda activate ctc-metrics
+conda activate ctc-with-mpi4py_v2
 
 # run the worker (which can consider the OMPI_COMM_WORLD_RANK, etc.)
 echo "calling python for script that uses MPI variables"
