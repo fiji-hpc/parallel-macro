@@ -6,4 +6,4 @@ mpi_size = PM.getSize()
 import subprocess
 hostname = subprocess.check_output(['hostname'])
 
-print("FIJI macro on "+hostname+" is # "+str(mpi_rank)+" / "+str(mpi_size))
+print("FIJI Python script on "+hostname+" is # "+str(mpi_rank)+" / "+str(mpi_size))
