@@ -39,3 +39,6 @@ hs_err_pid*
 
 /bin/
 classpath
+
+# vim editor
+.*.sw*
