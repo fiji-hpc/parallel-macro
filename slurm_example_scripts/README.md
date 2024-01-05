@@ -1,4 +1,4 @@
-# Getting it run
+# What's here
 
 The purpose of these example scripts is to show (also allow one to experiment
 with, and to test environment) the underpinnings of how computing embarrassingly
@@ -6,6 +6,8 @@ parallel tasks can be achieved in a very rudimentary (low-level, if you will)
 way. If everything works here, there's a very good chance that a [high-level
 solution, the HPC Workflow Manager for Fiji](https://fiji-hpc.github.io/hpc-parallel-tools/),
 would work just well...
+
+# Getting it to run
 
 Let's first examine the computing environment and ways to execute scripts,
 before overviewing how these scripts learn how to portion their large tasks and
@@ -116,8 +118,10 @@ sbatch sbatch_0_iface.sh
 
 # What's being run
 
+... the **MPI-aware scripts**.
+
 Let's assume here that the computational environment is functional and the
-scripts are reporting two things:
+executed scripts are thus reporting two things:
 
 - on which compute nodes they appeared, as a proof that the execution was
   carried at multiple places in parallel time,
@@ -171,6 +175,16 @@ from the `mpi4py`](https://mpi4py.readthedocs.io/en/stable/install.html).
 > pip install mpi4py
 > ```
 
+> btw, pt.2:
+>
+> Installing `mpi4py` with `conda install mpi4py` wasn't working well because
+> it pulled inside (the current conda environment) a complete own MPI installation.
+> And recent MPI installations are usually not ready for Java; and if they are,
+> they are prepared with latest versions of Java; but Fiji still operates within
+> Java8 and so it cannot open the recent (future for Fiji) class files, and
+> fails with these MPI installations. Sadly.
+
+
 Check the file `sbatch_2_worker_PYTHON2.py` to find:
 
 ```python
@@ -179,5 +193,48 @@ mpi_lib = MPI.COMM_WORLD
 mpi_rank = mpi_lib.Get_rank()
 ```
 
-## Fiji's macro
-## Fiji's Jython
+## Fiji
+
+Finally, the Fiji's very own snippets are examined here.
+
+The background is that these scripts are to be executed on the server, cluster,
+or just [anywhere where Fiji with MPI binding is prepared. At runtime, such
+Fiji](https://github.com/fiji-hpc/parallel-macro/wiki/Short-Guide#remote-cluster)
+has direct access to the MPI context and can, for example, query a rank and
+world size from the MPI. However, the [MPI API calls are
+wrapped](https://github.com/fiji-hpc/parallel-macro/wiki/How-to-write-a-parallel-Macro)
+owing to the [Parallel Macro installation](https://github.com/fiji-hpc/parallel-macro),
+which makes the selected API calls easily accessible to Fiji power users and
+programmers.
+
+Owing additionally to Fiji's macro editor's autocompletion functionality, one
+can very easily start using the Fiji-MPI binding, and the scripts below shall
+provide a kick start to it.
+
+### Fiji's macro
+
+The (ImageJ1) macro language has been extended with several commands, all
+starting with the prefix `par...` For example, to obtain the rank in the macro,
+just write:
+
+```C
+mpi_rank = parGetRank();
+```
+
+Again, further relevant functions can be discovered via the autocompletion,
+just start typing "par".
+
+### Fiji's Jython
+
+In Jython scripts, it is similar:
+
+```Python
+from cz.it4i.fiji.parallel_macro import ParallelMacro as PM
+mpi_rank = PM.getRank()
+```
+
+The `PM` class then offers more, just explore with the autocompletion.
+
+**Note** again that the Fiji scripts would not work on the client Fiji, they
+work only in [Fijis that are executed within a compatible MPI
+context](https://github.com/fiji-hpc/parallel-macro/wiki/Short-Guide#remote-cluster).
