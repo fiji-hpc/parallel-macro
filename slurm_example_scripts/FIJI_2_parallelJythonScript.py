@@ -1,4 +1,4 @@
-from cz.it4i.fiji.parallel_macro import PM
+from cz.it4i.fiji.parallel_macro import ParallelMacro as PM
 
 mpi_rank = PM.getRank()
 mpi_size = PM.getSize()
@@ -6,4 +6,4 @@ mpi_size = PM.getSize()
 import subprocess
 hostname = subprocess.check_output(['hostname'])
 
-print("FIJI macro on "+hostname+" is # "+mpi_rank+" / "+mpi_size)
+print("FIJI macro on "+hostname+" is # "+str(mpi_rank)+" / "+str(mpi_size))
